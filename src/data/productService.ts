@@ -1,96 +1,52 @@
-import { CATEGORIES, products as seedProducts } from './products'
+import { apiFetch, ApiError } from '../lib/api'
+import { CATEGORIES } from './products'
 import type { Product } from '../types/product'
 
-const STORAGE_KEY = 'ecomerce.admin.products'
+export const LOW_STOCK_THRESHOLD = 5
 
-function slugify(value: string): string {
-  return value
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[̀-ͯ]/g, '')
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '')
+export function deriveCategories(products: Product[]): string[] {
+  const categories = new Set(products.map((product) => product.category))
+  CATEGORIES.forEach((category) => categories.add(category))
+  return Array.from(categories)
 }
 
-function readStore(): Product[] {
+export interface ProductDetail extends Product {
+  recentViews: number
+}
+
+export function getAllProducts(): Promise<Product[]> {
+  return apiFetch('/products')
+}
+
+export async function getProductById(id: string): Promise<ProductDetail | undefined> {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY)
-    if (raw) return JSON.parse(raw) as Product[]
-  } catch {
-    // datos corruptos: se vuelve a sembrar abajo
-  }
-
-  const seeded = JSON.parse(JSON.stringify(seedProducts)) as Product[]
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(seeded))
-  } catch {
-    // almacenamiento no disponible
-  }
-  return seeded
-}
-
-function writeStore(items: Product[]): void {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(items))
-  } catch {
-    // almacenamiento no disponible
+    return await apiFetch<ProductDetail>(`/products/${id}`)
+  } catch (error) {
+    if (error instanceof ApiError && error.status === 404) return undefined
+    throw error
   }
 }
 
-export function getAllProducts(): Product[] {
-  return readStore()
+export function getRelatedProducts(productId: string, limit = 4): Promise<Product[]> {
+  return apiFetch(`/products/${productId}/related?limit=${limit}`)
 }
 
-export function getProductById(id: string): Product | undefined {
-  return readStore().find((product) => product.id === id)
+export function getFrequentlyBoughtWith(productId: string, limit = 4): Promise<Product[]> {
+  return apiFetch(`/products/${productId}/frequently-bought-with?limit=${limit}`)
 }
 
-export function getCategories(): string[] {
-  const live = new Set(readStore().map((product) => product.category))
-  CATEGORIES.forEach((category) => live.add(category))
-  return Array.from(live)
+export function getLowStockProducts(threshold = LOW_STOCK_THRESHOLD): Promise<Product[]> {
+  return apiFetch(`/products/low-stock?threshold=${threshold}`, { auth: true })
 }
 
-export function getFeaturedProducts(): Product[] {
-  return readStore().filter((product) => product.featured)
+export function createProduct(data: Omit<Product, 'id'>): Promise<Product> {
+  return apiFetch('/products', { method: 'POST', auth: true, body: JSON.stringify(data) })
 }
 
-export function getRelatedProducts(productId: string, limit = 4): Product[] {
-  const all = readStore()
-  const current = all.find((product) => product.id === productId)
-  if (!current) return []
-  return all
-    .filter((product) => product.id !== productId && product.category === current.category)
-    .slice(0, limit)
+export function updateProduct(id: string, data: Partial<Omit<Product, 'id'>>): Promise<Product> {
+  return apiFetch(`/products/${id}`, { method: 'PUT', auth: true, body: JSON.stringify(data) })
 }
 
-export function createProduct(data: Omit<Product, 'id'>): Product {
-  const items = readStore()
-  const baseSlug = slugify(data.name) || 'producto'
-  let id = baseSlug
-  let suffix = 2
-  while (items.some((item) => item.id === id)) {
-    id = `${baseSlug}-${suffix}`
-    suffix += 1
-  }
-
-  const created: Product = { ...data, id }
-  writeStore([...items, created])
-  return created
-}
-
-export function updateProduct(id: string, data: Partial<Omit<Product, 'id'>>): Product | undefined {
-  const items = readStore()
-  let updated: Product | undefined
-  const next = items.map((item) => {
-    if (item.id !== id) return item
-    updated = { ...item, ...data }
-    return updated
-  })
-  if (updated) writeStore(next)
-  return updated
-}
-
-export function deleteProduct(id: string): void {
-  writeStore(readStore().filter((item) => item.id !== id))
+export function deleteProduct(id: string): Promise<void> {
+  return apiFetch(`/products/${id}`, { method: 'DELETE', auth: true })
 }

@@ -11,7 +11,12 @@ const FIELDS: { name: keyof ShippingDetails; label: string; type: string }[] = [
   { name: 'postalCode', label: 'Código postal', type: 'text' },
 ]
 
-export function ShippingForm({ onSubmit }: { onSubmit: (details: ShippingDetails) => void }) {
+interface ShippingFormProps {
+  onSubmit: (details: ShippingDetails) => void
+  submitting?: boolean
+}
+
+export function ShippingForm({ onSubmit, submitting = false }: ShippingFormProps) {
   const [form, setForm] = useState<ShippingDetails>(EMPTY_FORM)
 
   function handleSubmit(event: FormEvent) {
@@ -39,9 +44,10 @@ export function ShippingForm({ onSubmit }: { onSubmit: (details: ShippingDetails
 
       <button
         type="submit"
-        className="mt-2 w-full rounded-full bg-ink py-3 text-sm font-medium text-paper transition-colors hover:bg-accent"
+        disabled={submitting}
+        className="mt-2 w-full rounded-full bg-ink py-3 text-sm font-medium text-paper btn-shine transition-all duration-150 hover:bg-accent hover:shadow-md hover:shadow-accent/25 active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 focus-visible:ring-offset-2 focus-visible:ring-offset-paper disabled:cursor-not-allowed disabled:opacity-50 disabled:active:scale-100"
       >
-        Confirmar pedido
+        {submitting ? 'Confirmando…' : 'Confirmar pedido'}
       </button>
     </form>
   )

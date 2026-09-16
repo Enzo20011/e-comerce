@@ -20,13 +20,16 @@ export function Navbar() {
 
           <Link
             to="/favoritos"
-            className="relative flex items-center gap-2 rounded-full border border-ink/10 px-4 py-2 text-sm font-medium text-ink transition-colors hover:border-accent hover:text-accent"
+            className="relative flex items-center gap-2 rounded-full border border-ink/10 px-4 py-2 text-sm font-medium text-ink transition-all duration-150 hover:border-accent hover:text-accent active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 focus-visible:ring-offset-2 focus-visible:ring-offset-paper"
             aria-label="Ver favoritos"
           >
             <Heart size={18} strokeWidth={1.75} />
             <span className="hidden sm:inline">Favoritos</span>
             {wishlistCount > 0 && (
-              <span className="absolute -right-2 -top-2 flex h-5 min-w-5 items-center justify-center rounded-full bg-accent-2 px-1 text-xs font-semibold text-on-accent-2">
+              <span
+                key={wishlistCount}
+                className="animate-cart-bump absolute -right-2 -top-2 flex h-5 min-w-5 items-center justify-center rounded-full bg-accent-2 px-1 text-xs font-semibold text-on-accent-2"
+              >
                 {wishlistCount}
               </span>
             )}
@@ -35,13 +38,16 @@ export function Navbar() {
           <button
             type="button"
             onClick={toggleCart}
-            className="relative flex items-center gap-2 rounded-full border border-ink/10 px-4 py-2 text-sm font-medium text-ink transition-colors hover:border-accent hover:text-accent"
+            className="relative flex items-center gap-2 rounded-full border border-ink/10 px-4 py-2 text-sm font-medium text-ink transition-all duration-150 hover:border-accent hover:text-accent active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 focus-visible:ring-offset-2 focus-visible:ring-offset-paper"
             aria-label="Abrir carrito"
           >
             <ShoppingBag size={18} strokeWidth={1.75} />
             <span className="hidden sm:inline">Carrito</span>
             {itemCount > 0 && (
-              <span className="absolute -right-2 -top-2 flex h-5 min-w-5 items-center justify-center rounded-full bg-accent px-1 text-xs font-semibold text-on-accent">
+              <span
+                key={itemCount}
+                className="animate-cart-bump absolute -right-2 -top-2 flex h-5 min-w-5 items-center justify-center rounded-full bg-accent px-1 text-xs font-semibold text-on-accent"
+              >
                 {itemCount}
               </span>
             )}

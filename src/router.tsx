@@ -5,6 +5,8 @@ import { NotFoundPage } from './pages/NotFoundPage'
 import { ProductDetailPage } from './pages/ProductDetailPage'
 import { CheckoutPage } from './pages/CheckoutPage'
 import { WishlistPage } from './pages/WishlistPage'
+import { ComparePage } from './pages/ComparePage'
+import { TrackOrderPage } from './pages/TrackOrderPage'
 import { RequireAdminAuth } from './components/admin/RequireAdminAuth'
 import { AdminLayout } from './pages/admin/AdminLayout'
 import { AdminLoginPage } from './pages/admin/AdminLoginPage'
@@ -12,6 +14,12 @@ import { AdminDashboardPage } from './pages/admin/AdminDashboardPage'
 import { AdminProductsPage } from './pages/admin/AdminProductsPage'
 import { AdminProductFormPage } from './pages/admin/AdminProductFormPage'
 import { AdminOrdersPage } from './pages/admin/AdminOrdersPage'
+import { AdminReviewsPage } from './pages/admin/AdminReviewsPage'
+import { AdminCustomersPage } from './pages/admin/AdminCustomersPage'
+import { AdminCustomerDetailPage } from './pages/admin/AdminCustomerDetailPage'
+import { AdminNewsletterPage } from './pages/admin/AdminNewsletterPage'
+import { AdminCouponsPage } from './pages/admin/AdminCouponsPage'
+import { AdminActivityPage } from './pages/admin/AdminActivityPage'
 
 export const router = createBrowserRouter([
   {
@@ -21,6 +29,8 @@ export const router = createBrowserRouter([
       { path: '/product/:id', element: <ProductDetailPage /> },
       { path: '/checkout', element: <CheckoutPage /> },
       { path: '/favoritos', element: <WishlistPage /> },
+      { path: '/comparar', element: <ComparePage /> },
+      { path: '/pedido', element: <TrackOrderPage /> },
     ],
   },
   { path: '/admin/login', element: <AdminLoginPage /> },
@@ -37,6 +47,12 @@ export const router = createBrowserRouter([
       { path: 'products/new', element: <AdminProductFormPage /> },
       { path: 'products/:id/edit', element: <AdminProductFormPage /> },
       { path: 'orders', element: <AdminOrdersPage /> },
+      { path: 'reviews', element: <AdminReviewsPage /> },
+      { path: 'customers', element: <AdminCustomersPage /> },
+      { path: 'customers/:email', element: <AdminCustomerDetailPage /> },
+      { path: 'newsletter', element: <AdminNewsletterPage /> },
+      { path: 'coupons', element: <AdminCouponsPage /> },
+      { path: 'activity', element: <AdminActivityPage /> },
     ],
   },
   { path: '*', element: <NotFoundPage /> },

@@ -18,7 +18,7 @@ export function CategoryFilter({ categories, selected, onSelect }: CategoryFilte
             key={category}
             type="button"
             onClick={() => onSelect(category)}
-            className={`rounded-full border px-4 py-1.5 text-sm font-medium transition-colors ${
+            className={`rounded-full border px-4 py-1.5 text-sm font-medium transition-all duration-150 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 focus-visible:ring-offset-2 focus-visible:ring-offset-paper ${
               isActive
                 ? 'border-accent bg-accent text-on-accent'
                 : 'border-ink/10 text-ink/70 hover:border-accent hover:text-accent'

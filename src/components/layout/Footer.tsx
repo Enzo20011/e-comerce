@@ -21,7 +21,7 @@ export function Footer() {
               <a
                 key={label}
                 href="#"
-                className="flex h-8 w-8 items-center justify-center rounded-full border border-ink/10 text-xs font-semibold text-ink/60 transition-colors hover:border-accent hover:text-accent"
+                className="flex h-8 w-8 items-center justify-center rounded-full border border-ink/10 text-xs font-semibold text-ink/60 transition-all duration-150 hover:border-accent hover:text-accent active:scale-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 focus-visible:ring-offset-2 focus-visible:ring-offset-paper"
               >
                 {label}
               </a>
@@ -40,6 +40,11 @@ export function Footer() {
             <li>
               <Link to="/favoritos" className="transition-colors hover:text-accent">
                 Favoritos
+              </Link>
+            </li>
+            <li>
+              <Link to="/pedido" className="transition-colors hover:text-accent">
+                Rastrear pedido
               </Link>
             </li>
           </ul>

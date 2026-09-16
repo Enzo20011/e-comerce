@@ -1,8 +1,5 @@
-import { createContext, useEffect, useReducer, type ReactNode } from 'react'
-
-const STORAGE_KEY = 'ecomerce.admin.session'
-const ADMIN_USERNAME = 'admin'
-const ADMIN_PASSWORD = 'admin'
+import { createContext, useReducer, type ReactNode } from 'react'
+import { apiFetch, getAdminToken, setAdminToken } from '../lib/api'
 
 interface AdminAuthState {
   isAuthenticated: boolean
@@ -11,11 +8,7 @@ interface AdminAuthState {
 type AdminAuthAction = { type: 'LOGIN' } | { type: 'LOGOUT' }
 
 function loadInitialState(): AdminAuthState {
-  try {
-    return { isAuthenticated: sessionStorage.getItem(STORAGE_KEY) === 'true' }
-  } catch {
-    return { isAuthenticated: false }
-  }
+  return { isAuthenticated: getAdminToken() !== null }
 }
 
 function authReducer(state: AdminAuthState, action: AdminAuthAction): AdminAuthState {
@@ -31,7 +24,7 @@ function authReducer(state: AdminAuthState, action: AdminAuthAction): AdminAuthS
 
 interface AdminAuthContextValue {
   isAuthenticated: boolean
-  login: (username: string, password: string) => boolean
+  login: (username: string, password: string) => Promise<boolean>
   logout: () => void
 }
 
@@ -40,25 +33,25 @@ export const AdminAuthContext = createContext<AdminAuthContextValue | null>(null
 export function AdminAuthProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(authReducer, undefined, loadInitialState)
 
-  useEffect(() => {
-    try {
-      if (state.isAuthenticated) sessionStorage.setItem(STORAGE_KEY, 'true')
-      else sessionStorage.removeItem(STORAGE_KEY)
-    } catch {
-      // almacenamiento no disponible
-    }
-  }, [state.isAuthenticated])
-
   const value: AdminAuthContextValue = {
     isAuthenticated: state.isAuthenticated,
-    login: (username, password) => {
-      if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
+    login: async (username, password) => {
+      try {
+        const { token } = await apiFetch<{ token: string }>('/admin/login', {
+          method: 'POST',
+          body: JSON.stringify({ username, password }),
+        })
+        setAdminToken(token)
         dispatch({ type: 'LOGIN' })
         return true
+      } catch {
+        return false
       }
-      return false
     },
-    logout: () => dispatch({ type: 'LOGOUT' }),
+    logout: () => {
+      setAdminToken(null)
+      dispatch({ type: 'LOGOUT' })
+    },
   }
 
   return <AdminAuthContext.Provider value={value}>{children}</AdminAuthContext.Provider>

@@ -1,14 +1,26 @@
 import { useState, type FormEvent } from 'react'
+import { toast } from 'sonner'
+import { subscribeToNewsletter } from '../../data/newsletterService'
 
 export function NewsletterForm() {
   const [email, setEmail] = useState('')
   const [submitted, setSubmitted] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
 
-  function handleSubmit(event: FormEvent) {
+  async function handleSubmit(event: FormEvent) {
     event.preventDefault()
     if (!email.trim()) return
-    setSubmitted(true)
-    setEmail('')
+
+    setSubmitting(true)
+    try {
+      await subscribeToNewsletter(email.trim())
+      setSubmitted(true)
+      setEmail('')
+    } catch {
+      toast.error('No pudimos completar la suscripción. Intentá de nuevo.')
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   if (submitted) {
@@ -27,9 +39,10 @@ export function NewsletterForm() {
       />
       <button
         type="submit"
-        className="flex-none rounded-full bg-ink px-4 py-2 text-sm font-medium text-paper transition-colors hover:bg-accent"
+        disabled={submitting}
+        className="flex-none rounded-full bg-ink px-4 py-2 text-sm font-medium text-paper transition-all duration-150 hover:bg-accent active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 focus-visible:ring-offset-2 focus-visible:ring-offset-paper disabled:cursor-not-allowed disabled:opacity-50 disabled:active:scale-100"
       >
-        Sumarme
+        {submitting ? '…' : 'Sumarme'}
       </button>
     </form>
   )

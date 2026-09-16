@@ -1,7 +1,9 @@
-import { useState, type FormEvent } from 'react'
+import { useEffect, useState, type FormEvent } from 'react'
 import { Navigate, useNavigate, useParams } from 'react-router-dom'
-import { createProduct, getCategories, getProductById, updateProduct } from '../../data/productService'
+import { toast } from 'sonner'
+import { createProduct, deriveCategories, getAllProducts, getProductById, updateProduct } from '../../data/productService'
 import { useDocumentTitle } from '../../hooks/useDocumentTitle'
+import { Skeleton } from '../../components/common/Skeleton'
 import type { Product } from '../../types/product'
 
 interface FormState {
@@ -32,23 +34,70 @@ export function AdminProductFormPage() {
   const { id } = useParams<{ id: string }>()
   const isEditing = id !== undefined
   const navigate = useNavigate()
-  const categories = getCategories()
-  const existing = isEditing ? getProductById(id) : undefined
 
   useDocumentTitle(isEditing ? 'Admin — Editar producto' : 'Admin — Nuevo producto')
 
-  const [form, setForm] = useState<FormState>(() => toFormState(existing, categories[0]))
+  const [categories, setCategories] = useState<string[]>([])
+  const [form, setForm] = useState<FormState | null>(null)
+  const [notFound, setNotFound] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
 
-  if (isEditing && !existing) {
+  useEffect(() => {
+    let cancelled = false
+
+    async function load() {
+      const products = await getAllProducts()
+      const derivedCategories = deriveCategories(products)
+      if (cancelled) return
+      setCategories(derivedCategories)
+
+      if (isEditing && id) {
+        const existing = await getProductById(id)
+        if (cancelled) return
+        if (!existing) {
+          setNotFound(true)
+          return
+        }
+        setForm(toFormState(existing, derivedCategories[0]))
+      } else {
+        setForm(toFormState(undefined, derivedCategories[0]))
+      }
+    }
+
+    load()
+    return () => {
+      cancelled = true
+    }
+  }, [id, isEditing])
+
+  if (notFound) {
     return <Navigate to="/admin/products" replace />
   }
 
-  function handleChange<K extends keyof FormState>(field: K, value: FormState[K]) {
-    setForm((prev) => ({ ...prev, [field]: value }))
+  if (!form) {
+    return (
+      <div className="max-w-xl">
+        <Skeleton className="h-8 w-48" />
+        <div className="mt-6 flex flex-col gap-4">
+          <Skeleton className="h-11 w-full rounded-xl" />
+          <Skeleton className="h-24 w-full rounded-xl" />
+          <div className="grid grid-cols-2 gap-4">
+            <Skeleton className="h-11 w-full rounded-xl" />
+            <Skeleton className="h-11 w-full rounded-xl" />
+          </div>
+          <Skeleton className="h-11 w-full rounded-xl" />
+        </div>
+      </div>
+    )
   }
 
-  function handleSubmit(event: FormEvent) {
+  function handleChange<K extends keyof FormState>(field: K, value: FormState[K]) {
+    setForm((prev) => (prev ? { ...prev, [field]: value } : prev))
+  }
+
+  async function handleSubmit(event: FormEvent) {
     event.preventDefault()
+    if (!form) return
 
     const images = form.images
       .split(',')
@@ -67,12 +116,21 @@ export function AdminProductFormPage() {
       image: images[0] ?? '',
     }
 
-    if (isEditing && id) {
-      updateProduct(id, data)
-    } else {
-      createProduct(data)
+    setSubmitting(true)
+    try {
+      if (isEditing && id) {
+        await updateProduct(id, data)
+        toast.success('Producto actualizado')
+      } else {
+        await createProduct(data)
+        toast.success('Producto creado')
+      }
+      navigate('/admin/products')
+    } catch {
+      toast.error('No pudimos guardar el producto. Intentá de nuevo.')
+    } finally {
+      setSubmitting(false)
     }
-    navigate('/admin/products')
   }
 
   return (
@@ -202,9 +260,10 @@ export function AdminProductFormPage() {
 
         <button
           type="submit"
-          className="mt-2 w-full rounded-full bg-ink py-3 text-sm font-medium text-paper transition-colors hover:bg-accent"
+          disabled={submitting}
+          className="mt-2 w-full rounded-full bg-ink py-3 text-sm font-medium text-paper btn-shine transition-all duration-150 hover:bg-accent hover:shadow-md hover:shadow-accent/25 active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 focus-visible:ring-offset-2 focus-visible:ring-offset-paper disabled:cursor-not-allowed disabled:opacity-50 disabled:active:scale-100"
         >
-          {isEditing ? 'Guardar cambios' : 'Crear producto'}
+          {submitting ? 'Guardando…' : isEditing ? 'Guardar cambios' : 'Crear producto'}
         </button>
       </form>
     </div>

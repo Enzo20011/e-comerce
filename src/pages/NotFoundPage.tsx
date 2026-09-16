@@ -7,7 +7,7 @@ export function NotFoundPage() {
       <p className="text-ink/60">No encontramos la página que buscás.</p>
       <Link
         to="/"
-        className="mt-2 rounded-full bg-ink px-5 py-2.5 text-sm font-medium text-paper transition-colors hover:bg-accent"
+        className="mt-2 rounded-full bg-ink px-5 py-2.5 text-sm font-medium text-paper btn-shine transition-all duration-150 hover:bg-accent hover:shadow-md hover:shadow-accent/25 active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 focus-visible:ring-offset-2 focus-visible:ring-offset-paper"
       >
         Volver al catálogo
       </Link>

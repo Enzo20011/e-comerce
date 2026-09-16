@@ -14,7 +14,7 @@ export function QuantityStepper({ quantity, max, onChange }: QuantityStepperProp
         onClick={() => onChange(quantity - 1)}
         disabled={quantity <= 1}
         aria-label="Restar cantidad"
-        className="flex h-6 w-6 items-center justify-center rounded-full text-ink/70 transition-colors hover:text-accent disabled:opacity-30"
+        className="flex h-6 w-6 items-center justify-center rounded-full text-ink/70 transition-all duration-150 hover:text-accent active:scale-90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-accent/50 disabled:opacity-30 disabled:active:scale-100"
       >
         <Minus size={14} />
       </button>
@@ -24,7 +24,7 @@ export function QuantityStepper({ quantity, max, onChange }: QuantityStepperProp
         onClick={() => onChange(quantity + 1)}
         disabled={quantity >= max}
         aria-label="Sumar cantidad"
-        className="flex h-6 w-6 items-center justify-center rounded-full text-ink/70 transition-colors hover:text-accent disabled:opacity-30"
+        className="flex h-6 w-6 items-center justify-center rounded-full text-ink/70 transition-all duration-150 hover:text-accent active:scale-90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-accent/50 disabled:opacity-30 disabled:active:scale-100"
       >
         <Plus size={14} />
       </button>

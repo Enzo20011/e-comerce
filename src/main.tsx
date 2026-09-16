@@ -5,16 +5,16 @@ import './index.css'
 import { router } from './router'
 import { AdminAuthProvider } from './context/AdminAuthContext'
 import { ThemeProvider, getPreferredTheme } from './context/ThemeContext'
-import { seedHistoricalOrdersIfEmpty } from './data/orderStore'
+import { AppToaster } from './components/common/AppToaster'
 
 document.documentElement.classList.toggle('dark', getPreferredTheme() === 'dark')
-seedHistoricalOrdersIfEmpty()
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <ThemeProvider>
       <AdminAuthProvider>
         <RouterProvider router={router} />
+        <AppToaster />
       </AdminAuthProvider>
     </ThemeProvider>
   </StrictMode>,

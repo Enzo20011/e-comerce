@@ -13,10 +13,14 @@ export function AdminLoginPage() {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
+  const [submitting, setSubmitting] = useState(false)
 
-  function handleSubmit(event: FormEvent) {
+  async function handleSubmit(event: FormEvent) {
     event.preventDefault()
-    const success = login(username, password)
+    setSubmitting(true)
+    setError(null)
+    const success = await login(username, password)
+    setSubmitting(false)
     if (!success) {
       setError('Usuario o contraseña incorrectos.')
       return
@@ -66,9 +70,10 @@ export function AdminLoginPage() {
 
           <button
             type="submit"
-            className="mt-2 w-full rounded-full bg-ink py-3 text-sm font-medium text-paper transition-colors hover:bg-accent"
+            disabled={submitting}
+            className="mt-2 w-full rounded-full bg-ink py-3 text-sm font-medium text-paper btn-shine transition-all duration-150 hover:bg-accent hover:shadow-md hover:shadow-accent/25 active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 focus-visible:ring-offset-2 focus-visible:ring-offset-paper disabled:cursor-not-allowed disabled:opacity-50 disabled:active:scale-100"
           >
-            Iniciar sesión
+            {submitting ? 'Ingresando…' : 'Iniciar sesión'}
           </button>
         </form>
       </div>

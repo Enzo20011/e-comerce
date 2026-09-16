@@ -1,5 +1,7 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import type { Product } from '../types/product'
+
+const PAGE_SIZE = 12
 
 export const ALL_CATEGORIES = 'Todas'
 
@@ -50,7 +52,18 @@ export function useProductFilters(allProducts: Product[]) {
     return sortProducts(bySearch, sortBy)
   }, [allProducts, searchTerm, selectedCategory, sortBy])
 
-  const isDefaultView = searchTerm.trim() === '' && selectedCategory === ALL_CATEGORIES && sortBy === 'featured'
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
+
+  useEffect(() => {
+    setVisibleCount(PAGE_SIZE)
+  }, [searchTerm, selectedCategory, sortBy])
+
+  const visibleProducts = filteredProducts.slice(0, visibleCount)
+  const hasMore = visibleCount < filteredProducts.length
+
+  function loadMore() {
+    setVisibleCount((count) => count + PAGE_SIZE)
+  }
 
   return {
     searchTerm,
@@ -60,6 +73,8 @@ export function useProductFilters(allProducts: Product[]) {
     sortBy,
     setSortBy,
     filteredProducts,
-    isDefaultView,
+    visibleProducts,
+    hasMore,
+    loadMore,
   }
 }

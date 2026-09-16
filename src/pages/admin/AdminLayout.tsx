@@ -1,13 +1,31 @@
 import { useEffect, useState } from 'react'
-import { LayoutDashboard, LogOut, Menu, Package, Receipt, X } from 'lucide-react'
+import {
+  History,
+  LayoutDashboard,
+  LogOut,
+  Mail,
+  Menu,
+  MessageSquareText,
+  Package,
+  Receipt,
+  Tag,
+  Users,
+  X,
+} from 'lucide-react'
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { useAdminAuth } from '../../hooks/useAdminAuth'
 import { ThemeToggle } from '../../components/common/ThemeToggle'
+import { AdminNotifications } from '../../components/admin/AdminNotifications'
 
 const NAV_ITEMS = [
   { to: '/admin', label: 'Dashboard', icon: LayoutDashboard, end: true },
   { to: '/admin/products', label: 'Productos', icon: Package, end: false },
   { to: '/admin/orders', label: 'Pedidos', icon: Receipt, end: false },
+  { to: '/admin/customers', label: 'Clientes', icon: Users, end: false },
+  { to: '/admin/reviews', label: 'Reseñas', icon: MessageSquareText, end: false },
+  { to: '/admin/newsletter', label: 'Newsletter', icon: Mail, end: false },
+  { to: '/admin/coupons', label: 'Cupones', icon: Tag, end: false },
+  { to: '/admin/activity', label: 'Actividad', icon: History, end: false },
 ]
 
 export function AdminLayout() {
@@ -32,7 +50,7 @@ export function AdminLayout() {
           type="button"
           onClick={() => setSidebarOpen(true)}
           aria-label="Abrir menú"
-          className="text-ink/70"
+          className="rounded-lg text-ink/70 transition-transform duration-150 active:scale-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 focus-visible:ring-offset-2 focus-visible:ring-offset-paper"
         >
           <Menu size={22} />
         </button>
@@ -40,7 +58,10 @@ export function AdminLayout() {
           Tienda<span className="italic text-accent">.</span>
           <span className="ml-1 text-xs font-normal text-ink/40">admin</span>
         </p>
-        <ThemeToggle />
+        <div className="flex items-center gap-1">
+          <AdminNotifications />
+          <ThemeToggle />
+        </div>
       </header>
 
       {sidebarOpen && (
@@ -64,7 +85,7 @@ export function AdminLayout() {
             type="button"
             onClick={() => setSidebarOpen(false)}
             aria-label="Cerrar menú"
-            className="text-ink/50 lg:hidden"
+            className="rounded-lg text-ink/50 transition-transform duration-150 active:scale-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 lg:hidden"
           >
             <X size={18} />
           </button>
@@ -77,7 +98,7 @@ export function AdminLayout() {
               to={to}
               end={end}
               className={({ isActive }) =>
-                `flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
+                `flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 focus-visible:ring-offset-2 focus-visible:ring-offset-paper ${
                   isActive ? 'bg-ink text-paper' : 'text-ink/60 hover:bg-ink/5'
                 }`
               }
@@ -96,7 +117,7 @@ export function AdminLayout() {
         <button
           type="button"
           onClick={handleLogout}
-          className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium text-ink/60 transition-colors hover:bg-ink/5"
+          className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium text-ink/60 transition-colors hover:bg-ink/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 focus-visible:ring-offset-2 focus-visible:ring-offset-paper"
         >
           <LogOut size={16} />
           Cerrar sesión
@@ -104,6 +125,9 @@ export function AdminLayout() {
       </aside>
 
       <main className="min-w-0 flex-1 overflow-x-hidden p-4 sm:p-6 lg:p-8">
+        <div className="mb-4 hidden justify-end lg:flex">
+          <AdminNotifications />
+        </div>
         <Outlet />
       </main>
     </div>

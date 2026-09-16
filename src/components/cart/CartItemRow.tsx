@@ -28,7 +28,7 @@ export function CartItemRow({ item, onUpdateQuantity, onRemove }: CartItemRowPro
             type="button"
             onClick={onRemove}
             aria-label={`Quitar ${product.name} del carrito`}
-            className="text-ink/40 transition-colors hover:text-accent"
+            className="text-ink/40 transition-all duration-150 hover:text-accent active:scale-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 focus-visible:ring-offset-2 focus-visible:ring-offset-paper"
           >
             <Trash2 size={16} />
           </button>

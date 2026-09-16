@@ -1,90 +1,52 @@
-import type { Order } from '../types/order'
-import { generateOrderNumber } from '../utils/order'
-import { getAllProducts } from './productService'
-
-const STORAGE_KEY = 'ecomerce.orders'
+import { apiFetch, ApiError } from '../lib/api'
+import type { CouponValidationResult, NewOrderInput, Order, OrderStatus } from '../types/order'
 
 export const FLAT_SHIPPING = 5.99
+export const FREE_SHIPPING_THRESHOLD = 75
 
-const FAKE_SHIPPING = {
-  name: 'Juan Pérez',
-  email: 'juan.perez@example.com',
-  address: 'Av. Siempreviva 742',
-  city: 'Buenos Aires',
-  postalCode: 'C1000',
+export function getShippingCost(subtotal: number): number {
+  return subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : FLAT_SHIPPING
 }
 
-export function getAllOrders(): Order[] {
+export function getOrderTotal(subtotal: number, discountAmount = 0): number {
+  const discounted = Math.max(0, subtotal - discountAmount)
+  return discounted + getShippingCost(discounted)
+}
+
+export async function validateCoupon(code: string, subtotal: number): Promise<CouponValidationResult> {
+  const params = new URLSearchParams({ subtotal: String(subtotal) })
   try {
-    const raw = localStorage.getItem(STORAGE_KEY)
-    return raw ? (JSON.parse(raw) as Order[]) : []
-  } catch {
-    return []
+    return await apiFetch<CouponValidationResult>(
+      `/coupons/${encodeURIComponent(code)}/validate?${params.toString()}`,
+    )
+  } catch (error) {
+    if (error instanceof ApiError) return { valid: false, message: error.message, discountAmount: 0 }
+    throw error
   }
 }
 
-export function addOrder(order: Order): void {
-  try {
-    const orders = getAllOrders()
-    orders.push(order)
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(orders))
-  } catch {
-    // almacenamiento no disponible
-  }
+export function getAllOrders(): Promise<Order[]> {
+  return apiFetch('/orders', { auth: true })
 }
 
-function randomInt(min: number, max: number): number {
-  return Math.floor(Math.random() * (max - min + 1)) + min
+export function addOrder(input: NewOrderInput): Promise<Order> {
+  return apiFetch('/orders', { method: 'POST', body: JSON.stringify(input) })
 }
 
-function buildHistoricalOrder(date: Date, index: number, products: ReturnType<typeof getAllProducts>): Order {
-  const itemCount = randomInt(1, 3)
-  const items = Array.from({ length: itemCount }, () => {
-    const product = products[randomInt(0, products.length - 1)]
-    return { product, quantity: randomInt(1, 3) }
+export function updateOrderStatus(orderNumber: string, status: OrderStatus): Promise<Order> {
+  return apiFetch(`/orders/${orderNumber}/status`, {
+    method: 'PATCH',
+    auth: true,
+    body: JSON.stringify({ status }),
   })
-
-  const subtotal = items.reduce((sum, item) => sum + item.product.price * item.quantity, 0)
-  const createdAt = new Date(date)
-  createdAt.setHours(randomInt(8, 21), randomInt(0, 59), 0, 0)
-
-  return {
-    orderNumber: `${generateOrderNumber()}-${index}`,
-    items,
-    subtotal,
-    shipping: FAKE_SHIPPING,
-    createdAt: createdAt.toISOString(),
-  }
 }
 
-export function seedHistoricalOrdersIfEmpty(): void {
-  if (getAllOrders().length > 0) return
-
-  const products = getAllProducts()
-  if (products.length === 0) return
-
-  const orders: Order[] = []
-  const today = new Date()
-  const DAYS_BACK = 150
-
-  for (let daysAgo = DAYS_BACK; daysAgo >= 0; daysAgo--) {
-    const day = new Date(today)
-    day.setDate(day.getDate() - daysAgo)
-
-    const hasOrders = Math.random() < 0.85
-    if (!hasOrders) continue
-
-    const isBusyDay = daysAgo % 20 === 0
-    const orderCount = isBusyDay ? randomInt(5, 9) : randomInt(1, 4)
-
-    for (let i = 0; i < orderCount; i++) {
-      orders.push(buildHistoricalOrder(day, orders.length, products))
-    }
-  }
-
+export async function findOrder(orderNumber: string, email: string): Promise<Order | undefined> {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(orders))
-  } catch {
-    // almacenamiento no disponible
+    const params = new URLSearchParams({ orderNumber, email })
+    return await apiFetch<Order>(`/orders/find?${params.toString()}`)
+  } catch (error) {
+    if (error instanceof ApiError && error.status === 404) return undefined
+    throw error
   }
 }

@@ -35,26 +35,23 @@ export function CartDrawer() {
             type="button"
             onClick={closeCart}
             aria-label="Cerrar carrito"
-            className="text-ink/50 transition-colors hover:text-accent"
+            className="rounded-full text-ink/50 transition-all duration-150 hover:text-accent active:scale-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 focus-visible:ring-offset-2 focus-visible:ring-offset-paper"
           >
             <X size={20} />
           </button>
         </div>
 
-        <div className="border-b border-ink/10 px-6 py-3">
-          <Link
-            to="/"
-            onClick={closeCart}
-            className="inline-flex items-center gap-1.5 text-sm font-medium text-ink/60 transition-colors hover:text-accent"
-          >
-            <ArrowLeft size={15} /> Seguir comprando
-          </Link>
-        </div>
-
         <div className="flex-1 overflow-y-auto px-6">
           {items.length === 0 ? (
-            <div className="pt-10">
+            <div className="flex flex-col items-center gap-4 pt-10">
               <EmptyState message="Tu carrito está vacío." />
+              <Link
+                to="/"
+                onClick={closeCart}
+                className="inline-flex items-center gap-1.5 rounded-full text-sm font-medium text-ink transition-all duration-150 hover:text-accent active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 focus-visible:ring-offset-2 focus-visible:ring-offset-paper"
+              >
+                <ArrowLeft size={15} /> Seguir comprando
+              </Link>
             </div>
           ) : (
             <div className="divide-y divide-ink/10">
