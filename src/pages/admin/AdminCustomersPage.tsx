@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { useCurrency } from '../../context/CurrencyContext'
 import { useNavigate } from 'react-router-dom'
 import { ChevronLeft, ChevronRight, Download, Search, Users } from 'lucide-react'
 import { getAllOrders } from '../../data/orderStore'
@@ -8,21 +9,21 @@ import { TableSkeleton } from '../../components/common/TableSkeleton'
 import { getCustomers, type Customer } from '../../utils/analytics'
 import type { Order } from '../../types/order'
 
-const currency = new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'USD' })
+
 const PAGE_SIZE = 15
 
 function csvValue(value: string): string {
   return `"${value.replace(/"/g, '""')}"`
 }
 
-function downloadCustomersCsv(customers: Customer[]): void {
+function downloadCustomersCsv(customers: Customer[], formatPrice: (n: number) => string): void {
   const header = ['Cliente', 'Email', 'Pedidos', 'Total gastado', 'Último pedido'].join(',')
   const rows = customers.map((customer) =>
     [
       customer.name,
       customer.email,
       String(customer.orderCount),
-      currency.format(customer.totalSpent),
+      formatPrice(customer.totalSpent),
       new Date(customer.lastOrderAt).toLocaleDateString('es-AR'),
     ]
       .map(csvValue)
@@ -39,6 +40,7 @@ function downloadCustomersCsv(customers: Customer[]): void {
 }
 
 export function AdminCustomersPage() {
+  const { formatPrice } = useCurrency()
   useDocumentTitle('Admin — Clientes')
 
   const navigate = useNavigate()
@@ -73,7 +75,7 @@ export function AdminCustomersPage() {
         <h1 className="font-display text-2xl font-semibold text-ink">Clientes</h1>
         <button
           type="button"
-          onClick={() => downloadCustomersCsv(filtered)}
+          onClick={() => downloadCustomersCsv(filtered, formatPrice)}
           disabled={filtered.length === 0}
           className="flex items-center gap-2 rounded-full border border-ink/15 px-4 py-2 text-sm font-medium text-ink/70 transition-all duration-150 hover:border-accent hover:text-accent active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 focus-visible:ring-offset-2 focus-visible:ring-offset-paper disabled:cursor-not-allowed disabled:opacity-40 disabled:active:scale-100"
         >
@@ -134,7 +136,7 @@ export function AdminCustomersPage() {
                       )}
                     </td>
                     <td className="px-4 py-3 font-medium text-ink">
-                      {currency.format(customer.totalSpent)}
+                      {formatPrice(customer.totalSpent)}
                     </td>
                     <td className="px-4 py-3 text-ink/60">
                       {new Date(customer.lastOrderAt).toLocaleDateString('es-AR')}
@@ -164,7 +166,7 @@ export function AdminCustomersPage() {
                 </div>
                 <div className="mt-3 flex items-center justify-between border-t border-ink/10 pt-3 text-sm">
                   <span className="text-ink/60">{customer.orderCount} pedidos</span>
-                  <span className="font-semibold text-ink">{currency.format(customer.totalSpent)}</span>
+                  <span className="font-semibold text-ink">{formatPrice(customer.totalSpent)}</span>
                 </div>
               </button>
             ))}

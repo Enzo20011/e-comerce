@@ -1,9 +1,11 @@
 import { Check, Truck } from 'lucide-react'
+import { useCurrency } from '../../context/CurrencyContext'
 import { FREE_SHIPPING_THRESHOLD } from '../../data/orderStore'
 
-const currency = new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'USD' })
+
 
 export function FreeShippingProgress({ subtotal }: { subtotal: number }) {
+  const { formatPrice } = useCurrency()
   const remaining = Math.max(0, FREE_SHIPPING_THRESHOLD - subtotal)
   const percent = Math.min(100, (subtotal / FREE_SHIPPING_THRESHOLD) * 100)
   const unlocked = remaining === 0
@@ -19,7 +21,7 @@ export function FreeShippingProgress({ subtotal }: { subtotal: number }) {
         ) : (
           <>
             <Truck size={14} className="text-ink/40" />
-            Te faltan <span className="text-ink">{currency.format(remaining)}</span> para envío gratis
+            Te faltan <span className="text-ink">{formatPrice(remaining)}</span> para envío gratis
           </>
         )}
       </p>

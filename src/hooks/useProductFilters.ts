@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import type { Product } from '../types/product'
 
 const PAGE_SIZE = 12
@@ -30,9 +31,21 @@ function sortProducts(products: Product[], sortBy: SortOption): Product[] {
 }
 
 export function useProductFilters(allProducts: Product[]) {
-  const [searchTerm, setSearchTerm] = useState('')
-  const [selectedCategory, setSelectedCategory] = useState<string>(ALL_CATEGORIES)
+  const [searchParams] = useSearchParams()
+
+  const [searchTerm, setSearchTerm] = useState(searchParams.get('q') ?? '')
+  const [selectedCategory, setSelectedCategory] = useState<string>(
+    searchParams.get('cat') ?? ALL_CATEGORIES,
+  )
   const [sortBy, setSortBy] = useState<SortOption>('featured')
+
+  // Sync when URL params change (navbar category links / search overlay)
+  useEffect(() => {
+    const cat = searchParams.get('cat') ?? ALL_CATEGORIES
+    const q = searchParams.get('q') ?? ''
+    setSelectedCategory(cat)
+    setSearchTerm(q)
+  }, [searchParams])
 
   const filteredProducts = useMemo(() => {
     const byCategory =

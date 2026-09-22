@@ -1,11 +1,14 @@
 import { useState } from 'react'
+import { useCurrency } from '../../context/CurrencyContext'
 import { Check, Lock, RotateCcw, ShieldCheck, Tag, X } from 'lucide-react'
 import type { CartItem } from '../../types/cart'
 import type { CouponValidationResult } from '../../types/order'
 import { getOrderTotal, getShippingCost, validateCoupon } from '../../data/orderStore'
 import { FreeShippingProgress } from '../cart/FreeShippingProgress'
 
-const currency = new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'USD' })
+
+
+import { useCart } from '../../hooks/useCart'
 
 interface CheckoutSummaryProps {
   items: CartItem[]
@@ -22,6 +25,8 @@ export function CheckoutSummary({
   onCouponApplied,
   onCouponRemoved,
 }: CheckoutSummaryProps) {
+  const { removeItem } = useCart()
+  const { formatPrice } = useCurrency()
   const [couponInput, setCouponInput] = useState('')
   const [checking, setChecking] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -55,7 +60,7 @@ export function CheckoutSummary({
 
       <div className="mt-4 divide-y divide-ink/10 border-t border-ink/10 pt-2">
         {items.map((item) => (
-          <div key={item.product.id} className="flex items-center gap-3 py-3">
+          <div key={item.product.id} className="group flex items-center gap-3 py-3 relative">
             <img
               src={item.product.image}
               alt={item.product.name}
@@ -66,8 +71,18 @@ export function CheckoutSummary({
               <p className="text-xs text-ink/50">Cantidad: {item.quantity}</p>
             </div>
             <span className="text-sm font-semibold text-ink">
-              {currency.format(item.product.price * item.quantity)}
+              {formatPrice(item.product.price * item.quantity)}
             </span>
+            <button
+              onClick={(e) => {
+                e.preventDefault()
+                removeItem(item.product.id)
+              }}
+              title="Eliminar producto"
+              className="ml-2 flex h-8 w-8 items-center justify-center rounded-full bg-accent/5 text-accent/60 opacity-0 transition-all hover:bg-accent/10 hover:text-accent group-hover:opacity-100"
+            >
+              <X size={14} />
+            </button>
           </div>
         ))}
       </div>
@@ -116,21 +131,21 @@ export function CheckoutSummary({
       <div className="mt-4 space-y-1.5 border-t border-ink/10 pt-4 text-sm">
         <div className="flex justify-between text-ink/60">
           <span>Subtotal</span>
-          <span>{currency.format(subtotal)}</span>
+          <span>{formatPrice(subtotal)}</span>
         </div>
         {discountAmount > 0 && (
           <div className="flex justify-between text-accent">
             <span>Descuento</span>
-            <span>-{currency.format(discountAmount)}</span>
+            <span>-{formatPrice(discountAmount)}</span>
           </div>
         )}
         <div className="flex justify-between text-ink/60">
           <span>Envío</span>
-          <span>{shipping === 0 ? 'Gratis' : currency.format(shipping)}</span>
+          <span>{shipping === 0 ? 'Gratis' : formatPrice(shipping)}</span>
         </div>
         <div className="flex justify-between pt-1.5 text-base font-semibold text-ink">
           <span>Total</span>
-          <span>{currency.format(total)}</span>
+          <span>{formatPrice(total)}</span>
         </div>
       </div>
 

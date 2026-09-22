@@ -43,6 +43,22 @@ function cartReducer(state: CartState, action: CartAction): CartState {
       }
     }
 
+    case 'ADD_ITEM_SILENT': {
+      // Same as ADD_ITEM but does NOT open the cart drawer
+      const quantity = action.quantity ?? 1
+      const existing = state.items.find((item) => item.product.id === action.product.id)
+      if (!existing) {
+        return { ...state, items: [...state.items, { product: action.product, quantity }] }
+      }
+      const nextQuantity = Math.min(existing.quantity + quantity, action.product.stock)
+      return {
+        ...state,
+        items: state.items.map((item) =>
+          item.product.id === action.product.id ? { ...item, quantity: nextQuantity } : item,
+        ),
+      }
+    }
+
     case 'REMOVE_ITEM':
       return {
         ...state,
@@ -89,6 +105,7 @@ function cartReducer(state: CartState, action: CartAction): CartState {
 interface CartContextValue {
   state: CartState
   addItem: (product: Product, quantity?: number) => void
+  addItemSilent: (product: Product, quantity?: number) => void
   removeItem: (productId: string) => void
   updateQuantity: (productId: string, quantity: number) => void
   clearCart: () => void
@@ -113,6 +130,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const value: CartContextValue = {
     state,
     addItem: (product, quantity) => dispatch({ type: 'ADD_ITEM', product, quantity }),
+    addItemSilent: (product, quantity) => dispatch({ type: 'ADD_ITEM_SILENT', product, quantity }),
     removeItem: (productId) => dispatch({ type: 'REMOVE_ITEM', productId }),
     updateQuantity: (productId, quantity) => dispatch({ type: 'UPDATE_QUANTITY', productId, quantity }),
     clearCart: () => dispatch({ type: 'CLEAR_CART' }),

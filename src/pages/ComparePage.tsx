@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useCurrency } from '../context/CurrencyContext'
 import { Link } from 'react-router-dom'
 import { Check, Star, X } from 'lucide-react'
 import { getAllProducts } from '../data/productService'
@@ -8,9 +9,10 @@ import { useDocumentTitle } from '../hooks/useDocumentTitle'
 import { EmptyState } from '../components/common/EmptyState'
 import type { Product } from '../types/product'
 
-const currency = new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'USD' })
+
 
 export function ComparePage() {
+  const { formatPrice } = useCurrency()
   useDocumentTitle('Comparar productos')
 
   const { state, removeItem } = useCompare()
@@ -74,7 +76,7 @@ export function ComparePage() {
                   <td className="p-4 text-xs font-medium uppercase tracking-wide text-ink/40">Precio</td>
                   {products.map((product) => (
                     <td key={product.id} className="p-4 font-semibold text-ink">
-                      {currency.format(product.price)}
+                      {formatPrice(product.price)}
                     </td>
                   ))}
                 </tr>

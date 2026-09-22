@@ -8,12 +8,15 @@ import { CartProvider } from './context/CartContext'
 import { WishlistProvider } from './context/WishlistContext'
 import { CompareProvider } from './context/CompareContext'
 
+
 export function Layout() {
   const location = useLocation()
 
   useEffect(() => {
-    window.scrollTo(0, 0)
-  }, [location.pathname])
+    if (!(location.state as any)?.scrollToCatalog) {
+      window.scrollTo(0, 0)
+    }
+  }, [location.pathname, location.state])
 
   return (
     <CartProvider>
@@ -22,7 +25,7 @@ export function Layout() {
           <div className="flex min-h-screen flex-col">
             <Navbar />
             <main className="flex-1">
-              <div key={location.pathname} className="animate-rise-in">
+              <div key={location.pathname} className="animate-rise-in" style={{ willChange: 'transform, opacity' }}>
                 <Outlet />
               </div>
             </main>

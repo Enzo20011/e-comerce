@@ -20,6 +20,8 @@ import { AdminCustomerDetailPage } from './pages/admin/AdminCustomerDetailPage'
 import { AdminNewsletterPage } from './pages/admin/AdminNewsletterPage'
 import { AdminCouponsPage } from './pages/admin/AdminCouponsPage'
 import { AdminActivityPage } from './pages/admin/AdminActivityPage'
+import { AdminOrderPrintPage } from './pages/admin/AdminOrderPrintPage'
+import { AdminCurrenciesPage } from './pages/admin/AdminCurrenciesPage'
 
 export const router = createBrowserRouter([
   {
@@ -52,7 +54,9 @@ export const router = createBrowserRouter([
       { path: 'customers/:email', element: <AdminCustomerDetailPage /> },
       { path: 'newsletter', element: <AdminNewsletterPage /> },
       { path: 'coupons', element: <AdminCouponsPage /> },
+      { path: 'currencies', element: <AdminCurrenciesPage /> },
       { path: 'activity', element: <AdminActivityPage /> },
+      { path: 'orders/:id/print', element: <AdminOrderPrintPage /> },
     ],
   },
   { path: '*', element: <NotFoundPage /> },

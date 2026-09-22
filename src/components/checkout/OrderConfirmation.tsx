@@ -1,12 +1,14 @@
 import { CheckCircle2 } from 'lucide-react'
+import { useCurrency } from '../../context/CurrencyContext'
 import { Link } from 'react-router-dom'
 import type { Order } from '../../types/order'
 import { getOrderTotal } from '../../data/orderStore'
 import { OrderStatusTimeline } from '../common/OrderStatusTimeline'
 
-const currency = new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'USD' })
+
 
 export function OrderConfirmation({ order }: { order: Order }) {
+  const { formatPrice } = useCurrency()
   const total = getOrderTotal(order.subtotal, order.discountAmount)
 
   return (
@@ -37,7 +39,7 @@ export function OrderConfirmation({ order }: { order: Order }) {
                 {item.product.name} × {item.quantity}
               </span>
               <span className="font-medium text-ink">
-                {currency.format(item.product.price * item.quantity)}
+                {formatPrice(item.product.price * item.quantity)}
               </span>
             </div>
           ))}
@@ -47,12 +49,12 @@ export function OrderConfirmation({ order }: { order: Order }) {
           {order.discountAmount > 0 && (
             <div className="flex justify-between text-accent">
               <span>Descuento {order.discountCode && `(${order.discountCode})`}</span>
-              <span>-{currency.format(order.discountAmount)}</span>
+              <span>-{formatPrice(order.discountAmount)}</span>
             </div>
           )}
           <div className="flex justify-between pt-1 text-base font-semibold text-ink">
             <span>Total</span>
-            <span>{currency.format(total)}</span>
+            <span>{formatPrice(total)}</span>
           </div>
         </div>
       </div>
@@ -62,7 +64,7 @@ export function OrderConfirmation({ order }: { order: Order }) {
           to="/"
           className="rounded-full bg-ink px-6 py-3 text-sm font-medium text-paper btn-shine transition-all duration-150 hover:bg-accent hover:shadow-md hover:shadow-accent/25 active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 focus-visible:ring-offset-2 focus-visible:ring-offset-paper"
         >
-          Volver al catálogo
+          Seguir comprando
         </Link>
         <Link
           to="/pedido"

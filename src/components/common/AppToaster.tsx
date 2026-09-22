@@ -8,7 +8,7 @@ export function AppToaster() {
     <Toaster
       theme={theme}
       richColors
-      position="bottom-right"
+      position="top-right"
       toastOptions={{ style: { fontFamily: 'Inter, system-ui, sans-serif' } }}
     />
   )

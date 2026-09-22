@@ -2,7 +2,7 @@ const TOKEN_KEY = 'ecomerce.admin.token'
 
 export function getAdminToken(): string | null {
   try {
-    return sessionStorage.getItem(TOKEN_KEY)
+    return localStorage.getItem(TOKEN_KEY)
   } catch {
     return null
   }
@@ -10,8 +10,8 @@ export function getAdminToken(): string | null {
 
 export function setAdminToken(token: string | null): void {
   try {
-    if (token) sessionStorage.setItem(TOKEN_KEY, token)
-    else sessionStorage.removeItem(TOKEN_KEY)
+    if (token) localStorage.setItem(TOKEN_KEY, token)
+    else localStorage.removeItem(TOKEN_KEY)
   } catch {
     // almacenamiento no disponible
   }
@@ -50,6 +50,13 @@ export async function apiFetch<T>(path: string, options: ApiFetchOptions = {}): 
   const body = isJson ? await response.json() : undefined
 
   if (!response.ok) {
+    // Si la sesión expiró, limpiar token y redirigir al login
+    if (response.status === 401 && auth) {
+      setAdminToken(null)
+      if (typeof window !== 'undefined' && !window.location.pathname.includes('/admin/login')) {
+        window.location.href = '/admin/login'
+      }
+    }
     const message = (body as { error?: string } | undefined)?.error ?? 'Ocurrió un error inesperado.'
     throw new ApiError(response.status, message)
   }

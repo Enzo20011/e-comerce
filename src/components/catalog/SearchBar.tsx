@@ -1,9 +1,10 @@
 import { useState } from 'react'
+import { useCurrency } from '../../context/CurrencyContext'
 import { Search } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import type { Product } from '../../types/product'
 
-const currency = new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'USD' })
+
 
 interface SearchBarProps {
   value: string
@@ -12,6 +13,7 @@ interface SearchBarProps {
 }
 
 export function SearchBar({ value, onChange, suggestions = [] }: SearchBarProps) {
+  const { formatPrice } = useCurrency()
   const [focused, setFocused] = useState(false)
   const showSuggestions = focused && value.trim() !== '' && suggestions.length > 0
 
@@ -46,7 +48,7 @@ export function SearchBar({ value, onChange, suggestions = [] }: SearchBarProps)
                 <p className="text-xs text-ink/50">{product.category}</p>
               </div>
               <span className="flex-none text-sm font-semibold text-ink">
-                {currency.format(product.price)}
+                {formatPrice(product.price)}
               </span>
             </Link>
           ))}

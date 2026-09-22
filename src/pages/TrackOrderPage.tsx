@@ -1,13 +1,15 @@
 import { useState, type FormEvent } from 'react'
+import { useCurrency } from '../context/CurrencyContext'
 import { PackageSearch, SearchX } from 'lucide-react'
 import { findOrder, getOrderTotal } from '../data/orderStore'
 import { useDocumentTitle } from '../hooks/useDocumentTitle'
 import { OrderStatusTimeline } from '../components/common/OrderStatusTimeline'
 import type { Order } from '../types/order'
 
-const currency = new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'USD' })
+
 
 export function TrackOrderPage() {
+  const { formatPrice } = useCurrency()
   useDocumentTitle('Rastrear pedido')
 
   const [orderNumber, setOrderNumber] = useState('')
@@ -97,7 +99,7 @@ export function TrackOrderPage() {
                   {item.product.name} × {item.quantity}
                 </span>
                 <span className="font-medium text-ink">
-                  {currency.format(item.product.price * item.quantity)}
+                  {formatPrice(item.product.price * item.quantity)}
                 </span>
               </div>
             ))}
@@ -107,12 +109,12 @@ export function TrackOrderPage() {
             {result.discountAmount > 0 && (
               <div className="flex justify-between text-accent">
                 <span>Descuento {result.discountCode && `(${result.discountCode})`}</span>
-                <span>-{currency.format(result.discountAmount)}</span>
+                <span>-{formatPrice(result.discountAmount)}</span>
               </div>
             )}
             <div className="flex justify-between pt-1 text-base font-semibold text-ink">
               <span>Total</span>
-              <span>{currency.format(getOrderTotal(result.subtotal, result.discountAmount))}</span>
+              <span>{formatPrice(getOrderTotal(result.subtotal, result.discountAmount))}</span>
             </div>
           </div>
         </div>

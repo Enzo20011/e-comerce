@@ -1,5 +1,6 @@
 import { useEffect, useState, type FormEvent } from 'react'
-import { Navigate, useNavigate, useParams } from 'react-router-dom'
+import { Link, Navigate, useNavigate, useParams } from 'react-router-dom'
+import { ArrowLeft } from 'lucide-react'
 import { toast } from 'sonner'
 import { createProduct, deriveCategories, getAllProducts, getProductById, updateProduct } from '../../data/productService'
 import { useDocumentTitle } from '../../hooks/useDocumentTitle'
@@ -135,6 +136,13 @@ export function AdminProductFormPage() {
 
   return (
     <div className="max-w-xl">
+      <Link
+        to="/admin/products"
+        className="mb-4 inline-flex items-center gap-1.5 text-sm font-medium text-ink/50 transition-colors hover:text-accent"
+      >
+        <ArrowLeft size={15} /> Volver a productos
+      </Link>
+
       <h1 className="font-display text-2xl font-semibold text-ink">
         {isEditing ? 'Editar producto' : 'Nuevo producto'}
       </h1>
@@ -212,7 +220,7 @@ export function AdminProductFormPage() {
               className="w-full rounded-xl border border-ink/15 bg-surface/60 px-4 py-2.5 text-sm text-ink outline-none focus:border-accent"
             >
               {categories.map((category) => (
-                <option key={category} value={category}>
+                <option key={category} value={category} className="bg-surface text-ink">
                   {category}
                 </option>
               ))}

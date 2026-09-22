@@ -81,6 +81,15 @@ db.exec(`
     email TEXT PRIMARY KEY,
     subscribed_at TEXT NOT NULL
   );
+
+  CREATE TABLE IF NOT EXISTS currencies (
+    code TEXT PRIMARY KEY,
+    symbol TEXT NOT NULL,
+    rate REAL NOT NULL,
+    active INTEGER NOT NULL DEFAULT 1,
+    is_base INTEGER NOT NULL DEFAULT 0,
+    last_updated TEXT NOT NULL
+  );
 `)
 
 function ensureColumn(table: string, column: string, definition: string): void {
@@ -273,8 +282,36 @@ function seedCouponsIfEmpty(): void {
   insert.run('10OFF', 'fixed', 10, 50, null, null, now)
 }
 
+function seedCurrenciesIfEmpty(): void {
+  const { count } = db.prepare('SELECT COUNT(*) as count FROM currencies').get() as { count: number }
+  if (count > 0) return
+
+  const insert = db.prepare(`
+    INSERT INTO currencies (code, symbol, rate, active, is_base, last_updated)
+    VALUES (?, ?, ?, ?, ?, ?)
+  `)
+  const now = new Date().toISOString()
+
+  // Base ARS (rate = 1.0 — siempre)
+  insert.run('ARS', 'AR$', 1.0, 1, 1, now)
+
+  // Tasas aproximadas al dólar blue ~1540 ARS/USD (sep 2026)
+  // rate = cuántas unidades de esa moneda vale 1 ARS
+  // 1 ARS = 1/1540 USD ≈ 0.000649
+  insert.run('USD', 'US$', 1 / 1540,        1, 0, now)
+  // EUR: 1 USD ≈ 0.92 EUR → 1 ARS = 0.92/1540 ≈ 0.000597
+  insert.run('EUR', '€',   0.92 / 1540,     1, 0, now)
+  // BRL: 1 USD ≈ 5.10 BRL → 1 ARS = 5.10/1540 ≈ 0.00331
+  insert.run('BRL', 'R$',  5.10 / 1540,     1, 0, now)
+  // CLP: 1 USD ≈ 940 CLP → 1 ARS = 940/1540 ≈ 0.610
+  insert.run('CLP', 'CLP$', 940 / 1540,     1, 0, now)
+  // MXN: 1 USD ≈ 17 MXN → 1 ARS = 17/1540 ≈ 0.01104
+  insert.run('MXN', 'MX$', 17 / 1540,       1, 0, now)
+}
+
 seedProductsIfEmpty()
 seedReviewsIfEmpty()
 seedAdminUserIfEmpty()
 seedHistoricalOrdersIfEmpty()
 seedCouponsIfEmpty()
+seedCurrenciesIfEmpty()

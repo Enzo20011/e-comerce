@@ -1,10 +1,12 @@
 import type { Order } from '../types/order'
+import type { Product } from '../types/product'
 import { getOrderTotal } from '../data/orderStore'
 
 export interface RevenuePoint {
   label: string
   revenue: number
   orderCount: number
+  rawDate: string
 }
 
 export interface SummaryStats {
@@ -31,7 +33,8 @@ export function groupRevenueByDay(orders: Order[], days = 30): RevenuePoint[] {
   for (let i = days - 1; i >= 0; i--) {
     const date = new Date(today)
     date.setDate(date.getDate() - i)
-    buckets.set(dayKey(date), { label: DAY_LABELS.format(date), revenue: 0, orderCount: 0 })
+    const key = dayKey(date)
+    buckets.set(key, { label: DAY_LABELS.format(date), revenue: 0, orderCount: 0, rawDate: key })
   }
 
   for (const order of orders) {
@@ -52,7 +55,7 @@ export function groupRevenueByMonth(orders: Order[], months = 12): RevenuePoint[
   for (let i = months - 1; i >= 0; i--) {
     const date = new Date(today.getFullYear(), today.getMonth() - i, 1)
     const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
-    buckets.set(key, { label: MONTH_LABELS.format(date), revenue: 0, orderCount: 0 })
+    buckets.set(key, { label: MONTH_LABELS.format(date), revenue: 0, orderCount: 0, rawDate: key })
   }
 
   for (const order of orders) {
@@ -76,7 +79,7 @@ export function groupRevenueByYear(orders: Order[]): RevenuePoint[] {
 
   const buckets = new Map<number, RevenuePoint>()
   for (let year = minYear; year <= maxYear; year++) {
-    buckets.set(year, { label: String(year), revenue: 0, orderCount: 0 })
+    buckets.set(year, { label: String(year), revenue: 0, orderCount: 0, rawDate: String(year) })
   }
 
   for (const order of orders) {
@@ -193,6 +196,32 @@ export function getTopProducts(orders: Order[], limit = 5): TopProduct[] {
   return Array.from(byProduct.values())
     .sort((a, b) => b.quantitySold - a.quantitySold)
     .slice(0, limit)
+}
+
+export interface CategoryRevenue {
+  category: string
+  revenue: number
+}
+
+export function getRevenueByCategory(orders: Order[], products: Product[]): CategoryRevenue[] {
+  const byCategory = new Map<string, number>()
+  const productCategories = new Map<string, string>()
+
+  for (const product of products) {
+    productCategories.set(product.id, product.category)
+  }
+
+  for (const order of orders) {
+    for (const item of order.items) {
+      const revenue = item.product.price * item.quantity
+      const cat = productCategories.get(item.product.id) ?? 'Otros'
+      byCategory.set(cat, (byCategory.get(cat) ?? 0) + revenue)
+    }
+  }
+
+  return Array.from(byCategory.entries())
+    .map(([category, revenue]) => ({ category, revenue }))
+    .sort((a, b) => b.revenue - a.revenue)
 }
 
 export interface PeriodComparison {

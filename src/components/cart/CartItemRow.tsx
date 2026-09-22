@@ -1,8 +1,9 @@
 import { Trash2 } from 'lucide-react'
+import { useCurrency } from '../../context/CurrencyContext'
 import type { CartItem } from '../../types/cart'
 import { QuantityStepper } from '../common/QuantityStepper'
 
-const currency = new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'USD' })
+
 
 interface CartItemRowProps {
   item: CartItem
@@ -11,6 +12,7 @@ interface CartItemRowProps {
 }
 
 export function CartItemRow({ item, onUpdateQuantity, onRemove }: CartItemRowProps) {
+  const { formatPrice } = useCurrency()
   const { product, quantity } = item
 
   return (
@@ -33,12 +35,12 @@ export function CartItemRow({ item, onUpdateQuantity, onRemove }: CartItemRowPro
             <Trash2 size={16} />
           </button>
         </div>
-        <p className="text-sm text-ink/60">{currency.format(product.price)}</p>
+        <p className="text-sm text-ink/60">{formatPrice(product.price)}</p>
 
         <div className="mt-auto flex items-center justify-between pt-2">
           <QuantityStepper quantity={quantity} max={product.stock} onChange={onUpdateQuantity} />
           <span className="text-sm font-semibold text-ink">
-            {currency.format(product.price * quantity)}
+            {formatPrice(product.price * quantity)}
           </span>
         </div>
       </div>

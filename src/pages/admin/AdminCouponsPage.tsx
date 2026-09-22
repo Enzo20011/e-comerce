@@ -1,4 +1,5 @@
 import { useEffect, useState, type FormEvent } from 'react'
+import { useCurrency } from '../../context/CurrencyContext'
 import { Percent, Plus, Power, Tag, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { createCoupon, deleteCoupon, getCoupons, toggleCoupon } from '../../data/couponService'
@@ -9,13 +10,14 @@ import { EmptyState } from '../../components/common/EmptyState'
 import { TableSkeleton } from '../../components/common/TableSkeleton'
 import { ApiError } from '../../lib/api'
 
-const currency = new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'USD' })
+
 
 function emptyForm() {
   return { code: '', type: 'percent' as CouponType, value: '', minSubtotal: '', usageLimit: '' }
 }
 
 export function AdminCouponsPage() {
+  const { formatPrice } = useCurrency()
   useDocumentTitle('Admin — Cupones')
 
   const [coupons, setCoupons] = useState<Coupon[] | null>(null)
@@ -103,8 +105,8 @@ export function AdminCouponsPage() {
             }
             className="w-full rounded-lg border border-ink/15 bg-paper px-3 py-2 text-sm text-ink outline-none focus:border-accent"
           >
-            <option value="percent">Porcentaje</option>
-            <option value="fixed">Monto fijo</option>
+            <option value="percent" className="bg-surface text-ink">Porcentaje</option>
+            <option value="fixed" className="bg-surface text-ink">Monto fijo</option>
           </select>
         </div>
         <div>
@@ -179,8 +181,8 @@ export function AdminCouponsPage() {
                     )}
                   </p>
                   <p className="text-xs text-ink/50">
-                    {coupon.type === 'percent' ? `${coupon.value}% de descuento` : `${currency.format(coupon.value)} de descuento`}
-                    {coupon.minSubtotal > 0 && ` · mín. ${currency.format(coupon.minSubtotal)}`}
+                    {coupon.type === 'percent' ? `${coupon.value}% de descuento` : `${formatPrice(coupon.value)} de descuento`}
+                    {coupon.minSubtotal > 0 && ` · mín. ${formatPrice(coupon.minSubtotal)}`}
                     {' · '}
                     {coupon.usedCount} usado{coupon.usedCount === 1 ? '' : 's'}
                     {coupon.usageLimit !== null && ` de ${coupon.usageLimit}`}

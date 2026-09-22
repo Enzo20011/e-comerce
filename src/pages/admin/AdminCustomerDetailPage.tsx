@@ -1,15 +1,17 @@
 import { useEffect, useMemo, useState } from 'react'
+import { useCurrency } from '../../context/CurrencyContext'
 import { Link, useParams } from 'react-router-dom'
-import { ArrowLeft, Mail, Receipt, Users } from 'lucide-react'
+import { ArrowLeft, Mail, Receipt, Users, Printer } from 'lucide-react'
 import { getAllOrders, getOrderTotal } from '../../data/orderStore'
 import { useDocumentTitle } from '../../hooks/useDocumentTitle'
 import { EmptyState } from '../../components/common/EmptyState'
 import { OrderStatusBadge } from '../../components/common/OrderStatusBadge'
 import type { Order } from '../../types/order'
 
-const currency = new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'USD' })
+
 
 export function AdminCustomerDetailPage() {
+  const { formatPrice } = useCurrency()
   const { email } = useParams<{ email: string }>()
   const decodedEmail = decodeURIComponent(email ?? '').toLowerCase()
   useDocumentTitle('Admin — Cliente')
@@ -74,7 +76,7 @@ export function AdminCustomerDetailPage() {
               <div>
                 <p className="text-xs font-medium uppercase tracking-wide text-ink/40">Total gastado</p>
                 <p className="mt-1 font-display text-lg font-semibold text-ink">
-                  {currency.format(totalSpent)}
+                  {formatPrice(totalSpent)}
                 </p>
               </div>
             </div>
@@ -94,7 +96,16 @@ export function AdminCustomerDetailPage() {
                       {new Date(order.createdAt).toLocaleString('es-AR')}
                     </p>
                   </div>
-                  <OrderStatusBadge status={order.status} />
+                  <div className="flex flex-col items-end gap-2">
+                    <OrderStatusBadge status={order.status} />
+                    <Link
+                      to={`/admin/orders/${order.orderNumber}/print`}
+                      target="_blank"
+                      className="flex items-center gap-1.5 rounded-md bg-ink/5 px-2.5 py-1 text-xs font-medium text-ink hover:bg-ink/10 transition-colors"
+                    >
+                      <Printer size={12} /> Imprimir remito
+                    </Link>
+                  </div>
                 </div>
 
                 <div className="mt-3 divide-y divide-ink/10 border-t border-ink/10 pt-3">
@@ -104,7 +115,7 @@ export function AdminCustomerDetailPage() {
                         {item.product.name} × {item.quantity}
                       </span>
                       <span className="font-medium text-ink">
-                        {currency.format(item.product.price * item.quantity)}
+                        {formatPrice(item.product.price * item.quantity)}
                       </span>
                     </div>
                   ))}
@@ -112,7 +123,7 @@ export function AdminCustomerDetailPage() {
 
                 <div className="mt-3 flex justify-between border-t border-ink/10 pt-3 text-sm font-semibold text-ink">
                   <span>Total</span>
-                  <span>{currency.format(getOrderTotal(order.subtotal, order.discountAmount))}</span>
+                  <span>{formatPrice(getOrderTotal(order.subtotal, order.discountAmount))}</span>
                 </div>
               </div>
             ))}

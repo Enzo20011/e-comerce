@@ -1,8 +1,9 @@
 import { apiFetch, ApiError } from '../lib/api'
 import type { CouponValidationResult, NewOrderInput, Order, OrderStatus } from '../types/order'
 
-export const FLAT_SHIPPING = 5.99
-export const FREE_SHIPPING_THRESHOLD = 75
+// Amounts in ARS (base currency). ~1 USD ≈ 1200 ARS at time of writing.
+export const FLAT_SHIPPING = 7200          // ~$5.99 USD
+export const FREE_SHIPPING_THRESHOLD = 90000 // ~$75 USD
 
 export function getShippingCost(subtotal: number): number {
   return subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : FLAT_SHIPPING

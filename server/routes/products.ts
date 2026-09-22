@@ -112,6 +112,16 @@ productsRouter.get('/products/:id/related', (req, res) => {
   const rows = db
     .prepare('SELECT * FROM products WHERE category = ? AND id != ? LIMIT ?')
     .all(current.category, id, limit) as unknown as ProductRow[]
+    
+  if (rows.length < limit) {
+    const placeholders = [id, ...rows.map(r => r.id)].map(() => '?').join(', ')
+    const excludeIds = [id, ...rows.map(r => r.id)]
+    const fallbackRows = db
+      .prepare(`SELECT * FROM products WHERE id NOT IN (${placeholders}) LIMIT ?`)
+      .all(...excludeIds, limit - rows.length) as unknown as ProductRow[]
+    rows.push(...fallbackRows)
+  }
+  
   res.json(rows.map(rowToProduct))
 })
 

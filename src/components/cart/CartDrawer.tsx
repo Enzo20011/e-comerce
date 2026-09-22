@@ -68,7 +68,7 @@ export function CartDrawer() {
         </div>
 
         {items.length > 0 && (
-          <CartSummary subtotal={subtotal} onClear={clearCart} onCheckout={handleCheckout} />
+          <CartSummary subtotal={subtotal} onClear={clearCart} onCheckout={handleCheckout} onClose={closeCart} />
         )}
       </aside>
     </div>

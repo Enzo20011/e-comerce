@@ -8,6 +8,7 @@ import { reviewsRouter } from './routes/reviews.ts'
 import { adminRouter } from './routes/admin.ts'
 import { newsletterRouter } from './routes/newsletter.ts'
 import { couponsRouter } from './routes/coupons.ts'
+import { currenciesRouter } from './routes/currencies_router.ts'
 import { activityRouter } from './routes/activity.ts'
 
 const PORT = Number(process.env.PORT) || 3001
@@ -26,6 +27,7 @@ app.use('/api', reviewsRouter)
 app.use('/api', adminRouter)
 app.use('/api', newsletterRouter)
 app.use('/api', couponsRouter)
+app.use('/api/currencies', currenciesRouter)
 app.use('/api', activityRouter)
 
 app.use((_req, res) => {
@@ -34,4 +36,5 @@ app.use((_req, res) => {
 
 app.listen(PORT, () => {
   console.log(`API escuchando en http://localhost:${PORT}`)
+  console.log('Server restarted!')
 })
