@@ -33,3 +33,11 @@ server/data.db
 .claude
 .agents
 skills-lock.json
+
+# Bases SQLite
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+.env.*
+!.env.example

@@ -59,7 +59,7 @@ reviewsRouter.patch('/reviews/:id/hide', requireAdmin, (req, res) => {
     res.status(404).json({ error: 'Reseña no encontrada.' })
     return
   }
-  logActivity(`Ocultó una reseña`)
+  logActivity(`Ocultó una reseña`, res.locals.admin)
   res.status(204).end()
 })
 
@@ -70,6 +70,6 @@ reviewsRouter.patch('/reviews/:id/restore', requireAdmin, (req, res) => {
     res.status(404).json({ error: 'Reseña no encontrada.' })
     return
   }
-  logActivity(`Restauró una reseña`)
+  logActivity(`Restauró una reseña`, res.locals.admin)
   res.status(204).end()
 })

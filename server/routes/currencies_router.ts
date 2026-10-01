@@ -1,8 +1,14 @@
 import { Router } from 'express'
-import { db } from '../db.ts'
+import { db, logActivity } from '../db.ts'
+import { z } from 'zod'
 import { requireAdmin } from '../auth.ts'
 
 export const currenciesRouter = Router()
+
+const currencyUpdateSchema = z.object({
+  rate: z.number().finite().positive().max(1e12),
+  active: z.boolean(),
+})
 
 interface Currency {
   code: string
@@ -38,12 +44,12 @@ currenciesRouter.get('/all', requireAdmin, (_req, res) => {
 // PUT /api/currencies/:code — editar tasa / estado
 currenciesRouter.put('/:code', requireAdmin, (req, res) => {
   try {
-    const { code } = req.params
-    const { rate, active } = req.body
-
-    if (typeof rate !== 'number' || typeof active !== 'boolean') {
+    const code = String(req.params.code)
+    const parsed = currencyUpdateSchema.safeParse(req.body)
+    if (!parsed.success) {
       return res.status(400).json({ error: 'Invalid payload' })
     }
+    const { rate, active } = parsed.data
 
     const stmt = db.prepare(
       'UPDATE currencies SET rate = ?, active = ?, last_updated = ? WHERE code = ? AND is_base = 0',
@@ -54,6 +60,7 @@ currenciesRouter.put('/:code', requireAdmin, (req, res) => {
       return res.status(404).json({ error: 'Currency not found or cannot edit base currency' })
     }
 
+    logActivity(`Actualizó la moneda ${code} (tasa ${rate}, ${active ? 'activa' : 'inactiva'})`, res.locals.admin)
     res.json({ success: true })
   } catch (error) {
     console.error('Failed to update currency:', error)
@@ -85,6 +92,7 @@ currenciesRouter.post('/sync', requireAdmin, async (_req, res) => {
     const blueData = await blueRes.json() as { compra: number; venta: number }
     // Usamos el promedio compra/venta
     const blueArsPerUsd = (blueData.compra + blueData.venta) / 2
+    if (!Number.isFinite(blueArsPerUsd) || blueArsPerUsd <= 0) throw new Error('Cotización blue inválida')
 
     // 2. Tasas internacionales vs USD (open.er-api.com)
     const erRes = await fetch('https://open.er-api.com/v6/latest/USD')
@@ -115,12 +123,13 @@ currenciesRouter.post('/sync', requireAdmin, async (_req, res) => {
         newRate = (1 / blueArsPerUsd) * ratesVsUsd[code]
       }
 
-      if (newRate !== null) {
+      if (newRate !== null && Number.isFinite(newRate) && newRate > 0) {
         updateStmt.run(newRate, now, code)
         updatedCount++
       }
     }
 
+    logActivity(`Sincronizó las tasas de cambio (${updatedCount} monedas)`, res.locals.admin)
     res.json({
       success: true,
       updated: updatedCount,
