@@ -1,6 +1,10 @@
 import { Router } from 'express'
 import { db, logActivity } from '../db.ts'
+import { z } from 'zod'
+import { randomUUID } from 'node:crypto'
 import { requireAdmin } from '../auth.ts'
+import { validateBody } from '../validation.ts'
+import { reviewCreateLimiter } from '../limiters.ts'
 
 interface ReviewRow {
   id: string
@@ -25,7 +29,29 @@ function rowToReview(row: ReviewRow) {
   }
 }
 
+const reviewSchema = z.object({
+  author: z.string().trim().min(2, 'Ingresá tu nombre.').max(60),
+  rating: z.number().int().min(1).max(5),
+  title: z.string().trim().min(2, 'Ingresá un título.').max(100),
+  body: z.string().trim().min(5, 'Escribí tu opinión.').max(2000),
+})
+
 export const reviewsRouter = Router()
+
+// Las reseñas nuevas quedan ocultas hasta que un admin las aprueba (Reseñas → Restaurar).
+reviewsRouter.post('/products/:id/reviews', reviewCreateLimiter, validateBody(reviewSchema), (req, res) => {
+  const productId = String(req.params.id)
+  if (!db.prepare('SELECT 1 FROM products WHERE id = ?').get(productId)) {
+    res.status(404).json({ error: 'Producto no encontrado.' })
+    return
+  }
+  const data = req.body as z.infer<typeof reviewSchema>
+  db.prepare(
+    'INSERT INTO reviews (id, product_id, author, rating, date, title, body, hidden) VALUES (?, ?, ?, ?, ?, ?, ?, 1)',
+  ).run(randomUUID(), productId, data.author, data.rating, 'recién', data.title, data.body)
+  logActivity(`Nueva reseña pendiente de moderación en "${productId}"`)
+  res.status(202).json({ message: 'Gracias. Tu reseña se publicará después de ser revisada.' })
+})
 
 reviewsRouter.get('/products/:id/reviews', (req, res) => {
   const rows = db
@@ -39,7 +65,8 @@ reviewsRouter.get('/reviews', requireAdmin, (_req, res) => {
     .prepare(
       `SELECT reviews.*, products.name as product_name
        FROM reviews
-       JOIN products ON products.id = reviews.product_id`,
+       JOIN products ON products.id = reviews.product_id
+       ORDER BY reviews.rowid DESC LIMIT 5000`,
     )
     .all() as unknown as (ReviewRow & { product_name: string })[]
 
@@ -59,7 +86,7 @@ reviewsRouter.patch('/reviews/:id/hide', requireAdmin, (req, res) => {
     res.status(404).json({ error: 'Reseña no encontrada.' })
     return
   }
-  logActivity(`Ocultó una reseña`)
+  logActivity(`Ocultó una reseña`, res.locals.admin)
   res.status(204).end()
 })
 
@@ -70,6 +97,6 @@ reviewsRouter.patch('/reviews/:id/restore', requireAdmin, (req, res) => {
     res.status(404).json({ error: 'Reseña no encontrada.' })
     return
   }
-  logActivity(`Restauró una reseña`)
+  logActivity(`Restauró una reseña`, res.locals.admin)
   res.status(204).end()
 })

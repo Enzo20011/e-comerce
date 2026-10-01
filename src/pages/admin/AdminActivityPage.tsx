@@ -49,7 +49,7 @@ export function AdminActivityPage() {
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="text-sm text-ink">{entry.action}</p>
-                  <p className="text-xs text-ink/45">{formatRelative(entry.createdAt)}</p>
+                  <p className="text-xs text-ink/45">{formatRelative(entry.createdAt)}{entry.actor ? ` · ${entry.actor}` : ''}</p>
                 </div>
               </div>
             ))}

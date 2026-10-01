@@ -30,6 +30,34 @@ export function getAllOrders(): Promise<Order[]> {
   return apiFetch('/orders', { auth: true })
 }
 
+export interface OrdersPage {
+  items: Order[]
+  total: number
+  page: number
+  pageSize: number
+}
+
+export interface OrdersQuery {
+  page: number
+  pageSize: number
+  status?: OrderStatus
+  q?: string
+}
+
+export function getOrdersPage({ page, pageSize, status, q }: OrdersQuery): Promise<OrdersPage> {
+  const params = new URLSearchParams({ page: String(page), pageSize: String(pageSize) })
+  if (status) params.set('status', status)
+  if (q) params.set('q', q)
+  return apiFetch(`/orders?${params.toString()}`, { auth: true })
+}
+
+export function exportOrders(status?: OrderStatus, q?: string): Promise<Order[]> {
+  const params = new URLSearchParams({ export: '1' })
+  if (status) params.set('status', status)
+  if (q) params.set('q', q)
+  return apiFetch(`/orders?${params.toString()}`, { auth: true })
+}
+
 export function addOrder(input: NewOrderInput): Promise<Order> {
   return apiFetch('/orders', { method: 'POST', body: JSON.stringify(input) })
 }

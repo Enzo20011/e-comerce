@@ -1,8 +1,9 @@
 import { Router } from 'express'
 import { z } from 'zod'
 import { db, logActivity } from '../db.ts'
-import { requireAdmin } from '../auth.ts'
+import { requireAdmin, requireOwner } from '../auth.ts'
 import { validateBody } from '../validation.ts'
+import { couponLimiter } from '../limiters.ts'
 import type { Coupon, CouponType, CouponValidationResult } from '../../src/types/order.ts'
 
 interface CouponRow {
@@ -72,12 +73,17 @@ export function getCouponByCode(code: string): Coupon | undefined {
 }
 
 const couponSchema = z.object({
-  code: z.string().trim().min(2).max(30),
+  code: z.string().trim().min(2).max(30).regex(/^[A-Za-z0-9_-]+$/, 'El código solo admite letras, números, - y _.'),
   type: z.enum(['percent', 'fixed']),
-  value: z.number().positive(),
-  minSubtotal: z.number().nonnegative().default(0),
+  value: z.number().positive().max(1_000_000_000),
+  minSubtotal: z.number().nonnegative().max(1_000_000_000).default(0),
   usageLimit: z.number().int().positive().nullable().optional(),
-  expiresAt: z.string().nullable().optional(),
+  expiresAt: z.string().refine((v) => !Number.isNaN(Date.parse(v)), 'Fecha inválida.').nullable().optional(),
+})
+
+const couponInputSchema = couponSchema.refine((d) => d.type !== 'percent' || d.value <= 100, {
+  message: 'El porcentaje no puede superar 100.',
+  path: ['value'],
 })
 
 export const couponsRouter = Router()
@@ -87,13 +93,13 @@ couponsRouter.get('/coupons', requireAdmin, (_req, res) => {
   res.json(rows.map(rowToCoupon))
 })
 
-couponsRouter.get('/coupons/:code/validate', (req, res) => {
-  const subtotal = Number(req.query.subtotal) || 0
+couponsRouter.get('/coupons/:code/validate', couponLimiter, (req, res) => {
+  const subtotal = Math.max(0, Number(req.query.subtotal) || 0)
   const coupon = getCouponByCode(String(req.params.code))
   res.json(checkCouponValidity(coupon, subtotal))
 })
 
-couponsRouter.post('/coupons', requireAdmin, validateBody(couponSchema), (req, res) => {
+couponsRouter.post('/coupons', requireAdmin, requireOwner, validateBody(couponInputSchema), (req, res) => {
   const data = req.body as z.infer<typeof couponSchema>
   const code = data.code.toUpperCase()
 
@@ -116,11 +122,11 @@ couponsRouter.post('/coupons', requireAdmin, validateBody(couponSchema), (req, r
     new Date().toISOString(),
   )
 
-  logActivity(`Creó el cupón "${code}"`)
+  logActivity(`Creó el cupón "${code}"`, res.locals.admin)
   res.status(201).json(getCouponByCode(code))
 })
 
-couponsRouter.patch('/coupons/:code/toggle', requireAdmin, (req, res) => {
+couponsRouter.patch('/coupons/:code/toggle', requireAdmin, requireOwner, (req, res) => {
   const coupon = getCouponByCode(String(req.params.code))
   if (!coupon) {
     res.status(404).json({ error: 'Cupón no encontrado.' })
@@ -128,13 +134,13 @@ couponsRouter.patch('/coupons/:code/toggle', requireAdmin, (req, res) => {
   }
 
   db.prepare('UPDATE coupons SET active = ? WHERE code = ?').run(coupon.active ? 0 : 1, coupon.code)
-  logActivity(`${coupon.active ? 'Desactivó' : 'Activó'} el cupón "${coupon.code}"`)
+  logActivity(`${coupon.active ? 'Desactivó' : 'Activó'} el cupón "${coupon.code}"`, res.locals.admin)
   res.json(getCouponByCode(coupon.code))
 })
 
-couponsRouter.delete('/coupons/:code', requireAdmin, (req, res) => {
+couponsRouter.delete('/coupons/:code', requireAdmin, requireOwner, (req, res) => {
   const code = String(req.params.code).toUpperCase()
   db.prepare('DELETE FROM coupons WHERE code = ?').run(code)
-  logActivity(`Eliminó el cupón "${code}"`)
+  logActivity(`Eliminó el cupón "${code}"`, res.locals.admin)
   res.status(204).end()
 })

@@ -1,6 +1,7 @@
 import { DatabaseSync } from 'node:sqlite'
 import { fileURLToPath } from 'node:url'
 import path from 'node:path'
+import { randomBytes } from 'node:crypto'
 import bcrypt from 'bcryptjs'
 import { products as seedProducts } from '../src/data/products.ts'
 import { AUTHOR_NAMES, REVIEW_BODIES, REVIEW_TITLES } from '../src/data/reviewTemplates.ts'
@@ -101,11 +102,20 @@ function ensureColumn(table: string, column: string, definition: string): void {
 
 ensureColumn('orders', 'discount_code', 'TEXT')
 ensureColumn('orders', 'discount_amount', 'REAL NOT NULL DEFAULT 0')
+ensureColumn('activity_log', 'actor', 'TEXT')
+ensureColumn('admin_users', 'failed_attempts', 'INTEGER NOT NULL DEFAULT 0')
+ensureColumn('admin_users', 'locked_until', 'INTEGER NOT NULL DEFAULT 0')
+ensureColumn('admin_users', 'role', "TEXT NOT NULL DEFAULT 'staff'")
+ensureColumn('admin_users', 'token_version', 'INTEGER NOT NULL DEFAULT 0')
+db.exec("UPDATE admin_users SET role = 'owner' WHERE username = (SELECT username FROM admin_users ORDER BY rowid LIMIT 1) AND NOT EXISTS (SELECT 1 FROM admin_users WHERE role = 'owner')")
+db.exec('CREATE INDEX IF NOT EXISTS idx_orders_created ON orders(created_at)')
+db.exec('CREATE INDEX IF NOT EXISTS idx_views_product ON product_views(product_id, viewed_at)')
 
-export function logActivity(action: string): void {
-  db.prepare('INSERT INTO activity_log (action, created_at) VALUES (?, ?)').run(
+export function logActivity(action: string, actor?: string): void {
+  db.prepare('INSERT INTO activity_log (action, created_at, actor) VALUES (?, ?, ?)').run(
     action,
     new Date().toISOString(),
+    actor ?? null,
   )
 }
 
@@ -191,11 +201,29 @@ function seedReviewsIfEmpty(): void {
 }
 
 function seedAdminUserIfEmpty(): void {
+  const isProduction = process.env.NODE_ENV === 'production'
   const { count } = db.prepare('SELECT COUNT(*) as count FROM admin_users').get() as { count: number }
-  if (count > 0) return
 
-  const passwordHash = bcrypt.hashSync('admin', 10)
-  db.prepare('INSERT INTO admin_users (username, password_hash) VALUES (?, ?)').run('admin', passwordHash)
+  if (count > 0) {
+    const row = db.prepare('SELECT password_hash FROM admin_users').all() as { password_hash: string }[]
+    if (isProduction && row.some((r) => bcrypt.compareSync('admin', r.password_hash))) {
+      throw new Error('Un usuario admin sigue con la contraseña por defecto "admin". Cambiala antes de salir a producción.')
+    }
+    return
+  }
+
+  let password = process.env.ADMIN_PASSWORD
+  if (!password) {
+    if (isProduction) throw new Error('Definí ADMIN_PASSWORD (mínimo 12 caracteres) para crear el admin inicial.')
+    password = randomBytes(9).toString('base64url')
+    console.log(`[dev] Admin inicial creado: usuario "admin", contraseña "${password}" (se muestra una sola vez).`)
+  }
+  if (isProduction && password.length < 12) throw new Error('ADMIN_PASSWORD debe tener al menos 12 caracteres.')
+
+  db.prepare('INSERT INTO admin_users (username, password_hash, role) VALUES (?, ?, \'owner\')').run(
+    process.env.ADMIN_USERNAME || 'admin',
+    bcrypt.hashSync(password, 12),
+  )
 }
 
 const FAKE_SHIPPING = {

@@ -9,7 +9,9 @@
     "dev:server": "tsx watch server/index.ts",
     "build": "tsc -b && vite build",
     "lint": "oxlint",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "start": "NODE_ENV=production tsx server/index.ts",
+    "backup": "tsx scripts/backup.ts"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.3.3",
@@ -17,6 +19,7 @@
     "cors": "^2.8.6",
     "express": "^5.2.1",
     "express-rate-limit": "^8.7.0",
+    "helmet": "^8.3.0",
     "jsonwebtoken": "^9.0.3",
     "lucide-react": "^1.45.0",
     "react": "^19.2.8",
@@ -25,6 +28,7 @@
     "recharts": "^3.10.1",
     "sonner": "^2.0.8",
     "tailwindcss": "^4.3.3",
+    "tsx": "^4.23.15",
     "zod": "^4.6.5"
   },
   "devDependencies": {
@@ -38,7 +42,6 @@
     "@vitejs/plugin-react": "^6.1.1",
     "concurrently": "^10.0.5",
     "oxlint": "^1.81.0",
-    "tsx": "^4.23.13",
     "typescript": "~6.0.2",
     "vite": "^8.3.0"
   }

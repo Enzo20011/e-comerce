@@ -21,3 +21,17 @@ export function hideReview(reviewId: string): Promise<void> {
 export function restoreReview(reviewId: string): Promise<void> {
   return apiFetch(`/reviews/${reviewId}/restore`, { method: 'PATCH', auth: true })
 }
+
+export interface NewReviewInput {
+  author: string
+  rating: number
+  title: string
+  body: string
+}
+
+export function submitReview(productId: string, input: NewReviewInput): Promise<{ message: string }> {
+  return apiFetch(`/products/${encodeURIComponent(productId)}/reviews`, {
+    method: 'POST',
+    body: JSON.stringify(input),
+  })
+}

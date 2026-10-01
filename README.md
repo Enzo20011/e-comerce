@@ -40,7 +40,15 @@ Abrí `http://localhost:5173`.
 
 ### Panel admin
 
-`http://localhost:5173/admin` — usuario `admin`, contraseña `admin` (login mock, sin seguridad real).
+`http://localhost:5200/admin`. En desarrollo la contraseña inicial se genera al azar y se imprime una vez en la consola del server (o definila con `ADMIN_PASSWORD`).
+
+### Producción
+
+Variables obligatorias (ver `.env.example`): `NODE_ENV=production`, `ADMIN_JWT_SECRET` (≥32 caracteres), `ADMIN_PASSWORD` (≥12, solo para crear el admin inicial), `CORS_ORIGIN` si el front está en otro dominio y `TRUST_PROXY=1` detrás de un proxy. El server se niega a arrancar con secretos por defecto. Servir siempre por HTTPS.
+
+`npm run build && npm start` sirve la API y el frontend compilado desde el mismo proceso (con cabeceras CSP/HSTS y redirección a HTTPS si hay `TRUST_PROXY`). La sesión de admin va en una cookie `HttpOnly` + `SameSite=Strict`, con header anti-CSRF.
+
+**Roles:** `owner` (todo, incluida la gestión de usuarios en `/admin/users`) y `staff` (productos, pedidos, reseñas; sin cupones, monedas, actividad ni borrados). **Backups:** automáticos al arrancar y cada 24 h en `server/backups` (`BACKUP_DIR`, `BACKUP_KEEP`); manual con `npm run backup`. **Reseñas:** las nuevas quedan ocultas hasta aprobarlas en Admin → Reseñas → Restaurar.
 
 ### Build de producción
 

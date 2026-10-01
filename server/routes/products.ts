@@ -1,19 +1,28 @@
 import { Router } from 'express'
 import { z } from 'zod'
 import { db, logActivity } from '../db.ts'
-import { requireAdmin } from '../auth.ts'
+import { requireAdmin, requireOwner } from '../auth.ts'
 import { validateBody } from '../validation.ts'
+import { productViewLimiter } from '../limiters.ts'
 import type { Product } from '../../src/types/product.ts'
 import type { OrderItem } from '../../src/types/order.ts'
 
+// Imágenes: ruta local (/images/...) o URL https.
+const imageSchema = z
+  .string()
+  .trim()
+  .min(1)
+  .max(500)
+  .refine((v) => /^\/images\/[\w./-]+$/.test(v) && !v.includes('..') || /^https:\/\/[^\s]+$/.test(v), 'La imagen debe ser una ruta /images/... o una URL https.')
+
 const productSchema = z.object({
-  name: z.string().trim().min(1),
-  description: z.string().trim().min(1),
-  price: z.number().nonnegative(),
-  category: z.string().trim().min(1),
-  image: z.string().trim().min(1),
-  images: z.array(z.string().trim().min(1)).min(1),
-  stock: z.number().int().nonnegative(),
+  name: z.string().trim().min(1).max(150),
+  description: z.string().trim().min(1).max(5000),
+  price: z.number().nonnegative().max(1_000_000_000),
+  category: z.string().trim().min(1).max(60),
+  image: imageSchema,
+  images: z.array(imageSchema).min(1).max(15),
+  stock: z.number().int().nonnegative().max(1_000_000),
   rating: z.number().min(0).max(5).optional(),
   featured: z.boolean().optional(),
 })
@@ -73,14 +82,14 @@ productsRouter.get('/products', (_req, res) => {
 })
 
 productsRouter.get('/products/low-stock', requireAdmin, (req, res) => {
-  const threshold = Number(req.query.threshold) || 5
+  const threshold = Math.min(Math.max(Number(req.query.threshold) || 5, 0), 1000)
   const rows = db
     .prepare('SELECT * FROM products WHERE stock > 0 AND stock <= ? ORDER BY stock ASC')
     .all(threshold) as unknown as ProductRow[]
   res.json(rows.map(rowToProduct))
 })
 
-productsRouter.get('/products/:id', (req, res) => {
+productsRouter.get('/products/:id', productViewLimiter, (req, res) => {
   const id = String(req.params.id)
   const row = db.prepare('SELECT * FROM products WHERE id = ?').get(id) as unknown as
     | ProductRow
@@ -100,7 +109,7 @@ productsRouter.get('/products/:id', (req, res) => {
 
 productsRouter.get('/products/:id/related', (req, res) => {
   const id = String(req.params.id)
-  const limit = Number(req.query.limit) || 4
+  const limit = Math.min(Math.max(Math.trunc(Number(req.query.limit)) || 4, 1), 20)
   const current = db.prepare('SELECT * FROM products WHERE id = ?').get(id) as unknown as
     | ProductRow
     | undefined
@@ -127,7 +136,7 @@ productsRouter.get('/products/:id/related', (req, res) => {
 
 productsRouter.get('/products/:id/frequently-bought-with', (req, res) => {
   const targetId = String(req.params.id)
-  const limit = Number(req.query.limit) || 4
+  const limit = Math.min(Math.max(Math.trunc(Number(req.query.limit)) || 4, 1), 20)
 
   const orderRows = db.prepare('SELECT items FROM orders').all() as unknown as { items: string }[]
   const counts = new Map<string, { product: OrderItem['product']; count: number }>()
@@ -193,7 +202,7 @@ productsRouter.post('/products', requireAdmin, validateBody(productSchema), (req
   )
 
   const row = db.prepare('SELECT * FROM products WHERE id = ?').get(id) as unknown as ProductRow
-  logActivity(`Creó el producto "${data.name}"`)
+  logActivity(`Creó el producto "${data.name}"`, res.locals.admin)
   res.status(201).json(rowToProduct(row))
 })
 
@@ -228,16 +237,16 @@ productsRouter.put('/products/:id', requireAdmin, validateBody(productUpdateSche
   )
 
   const row = db.prepare('SELECT * FROM products WHERE id = ?').get(id) as unknown as ProductRow
-  logActivity(`Actualizó el producto "${merged.name}"`)
+  logActivity(`Actualizó el producto "${merged.name}"`, res.locals.admin)
   res.json(rowToProduct(row))
 })
 
-productsRouter.delete('/products/:id', requireAdmin, (req, res) => {
+productsRouter.delete('/products/:id', requireAdmin, requireOwner, (req, res) => {
   const id = String(req.params.id)
   const existing = db.prepare('SELECT name FROM products WHERE id = ?').get(id) as
     | { name: string }
     | undefined
   db.prepare('DELETE FROM products WHERE id = ?').run(id)
-  if (existing) logActivity(`Eliminó el producto "${existing.name}"`)
+  if (existing) logActivity(`Eliminó el producto "${existing.name}"`, res.locals.admin)
   res.status(204).end()
 })
