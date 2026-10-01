@@ -1,7 +1,7 @@
 import { Router } from 'express'
 import { z } from 'zod'
 import { db, logActivity } from '../db.ts'
-import { requireAdmin } from '../auth.ts'
+import { requireAdmin, requireOwner } from '../auth.ts'
 import { validateBody } from '../validation.ts'
 import { couponLimiter } from '../limiters.ts'
 import type { Coupon, CouponType, CouponValidationResult } from '../../src/types/order.ts'
@@ -99,7 +99,7 @@ couponsRouter.get('/coupons/:code/validate', couponLimiter, (req, res) => {
   res.json(checkCouponValidity(coupon, subtotal))
 })
 
-couponsRouter.post('/coupons', requireAdmin, validateBody(couponInputSchema), (req, res) => {
+couponsRouter.post('/coupons', requireAdmin, requireOwner, validateBody(couponInputSchema), (req, res) => {
   const data = req.body as z.infer<typeof couponSchema>
   const code = data.code.toUpperCase()
 
@@ -126,7 +126,7 @@ couponsRouter.post('/coupons', requireAdmin, validateBody(couponInputSchema), (r
   res.status(201).json(getCouponByCode(code))
 })
 
-couponsRouter.patch('/coupons/:code/toggle', requireAdmin, (req, res) => {
+couponsRouter.patch('/coupons/:code/toggle', requireAdmin, requireOwner, (req, res) => {
   const coupon = getCouponByCode(String(req.params.code))
   if (!coupon) {
     res.status(404).json({ error: 'Cupón no encontrado.' })
@@ -138,7 +138,7 @@ couponsRouter.patch('/coupons/:code/toggle', requireAdmin, (req, res) => {
   res.json(getCouponByCode(coupon.code))
 })
 
-couponsRouter.delete('/coupons/:code', requireAdmin, (req, res) => {
+couponsRouter.delete('/coupons/:code', requireAdmin, requireOwner, (req, res) => {
   const code = String(req.params.code).toUpperCase()
   db.prepare('DELETE FROM coupons WHERE code = ?').run(code)
   logActivity(`Eliminó el cupón "${code}"`, res.locals.admin)

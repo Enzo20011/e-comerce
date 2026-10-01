@@ -1,9 +1,9 @@
-import { Fragment, useEffect, useMemo, useState } from 'react'
+import { Fragment, useEffect, useState } from 'react'
 import { useCurrency } from '../../context/CurrencyContext'
 import { Link } from 'react-router-dom'
 import { ChevronDown, Download, Search, Printer } from 'lucide-react'
 import { toast } from 'sonner'
-import { getAllOrders, getOrderTotal, updateOrderStatus } from '../../data/orderStore'
+import { exportOrders, getOrderTotal, getOrdersPage, updateOrderStatus } from '../../data/orderStore'
 import { useDocumentTitle } from '../../hooks/useDocumentTitle'
 import { EmptyState } from '../../components/common/EmptyState'
 import { OrderStatusBadge } from '../../components/common/OrderStatusBadge'
@@ -49,35 +49,53 @@ export function AdminOrdersPage() {
   useDocumentTitle('Admin — Pedidos')
 
   const [orders, setOrders] = useState<Order[] | null>(null)
+  const [total, setTotal] = useState(0)
   const [search, setSearch] = useState('')
+  const [debouncedSearch, setDebouncedSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState<OrderStatus | 'todos'>('todos')
   const [expanded, setExpanded] = useState<string | null>(null)
   const [page, setPage] = useState(1)
 
   useEffect(() => {
-    getAllOrders().then(setOrders)
-  }, [])
-
-  const filtered = useMemo(() => {
-    if (!orders) return []
-    const term = search.trim().toLowerCase()
-    return orders.filter((order) => {
-      const matchesSearch =
-        !term ||
-        order.orderNumber.toLowerCase().includes(term) ||
-        order.shipping.name.toLowerCase().includes(term) ||
-        order.shipping.email.toLowerCase().includes(term)
-      const matchesStatus = statusFilter === 'todos' || order.status === statusFilter
-      return matchesSearch && matchesStatus
-    })
-  }, [orders, search, statusFilter])
+    const timer = setTimeout(() => setDebouncedSearch(search.trim()), 300)
+    return () => clearTimeout(timer)
+  }, [search])
 
   useEffect(() => {
     setPage(1)
-  }, [search, statusFilter])
+  }, [debouncedSearch, statusFilter])
 
-  const pageCount = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
-  const paginated = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
+  useEffect(() => {
+    let active = true
+    getOrdersPage({
+      page,
+      pageSize: PAGE_SIZE,
+      status: statusFilter === 'todos' ? undefined : statusFilter,
+      q: debouncedSearch || undefined,
+    })
+      .then((result) => {
+        if (!active) return
+        setOrders(result.items)
+        setTotal(result.total)
+      })
+      .catch(() => active && toast.error('No pudimos cargar los pedidos.'))
+    return () => {
+      active = false
+    }
+  }, [page, statusFilter, debouncedSearch])
+
+  const filtered = orders ?? []
+  const paginated = filtered
+  const pageCount = Math.max(1, Math.ceil(total / PAGE_SIZE))
+
+  async function handleExport() {
+    try {
+      const all = await exportOrders(statusFilter === 'todos' ? undefined : statusFilter, debouncedSearch || undefined)
+      downloadOrdersCsv(all, formatPrice)
+    } catch {
+      toast.error('No pudimos exportar los pedidos.')
+    }
+  }
 
   async function handleStatusChange(orderNumber: string, status: OrderStatus) {
     setOrders((current) =>
@@ -88,8 +106,11 @@ export function AdminOrdersPage() {
     try {
       await updateOrderStatus(orderNumber, status)
       toast.success(`Pedido ${orderNumber} marcado como "${ORDER_STATUS_LABELS[status]}"`)
-    } catch {
-      toast.error('No pudimos actualizar el estado del pedido.')
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'No pudimos actualizar el estado del pedido.')
+      getOrdersPage({ page, pageSize: PAGE_SIZE, status: statusFilter === 'todos' ? undefined : statusFilter, q: debouncedSearch || undefined })
+        .then((result) => setOrders(result.items))
+        .catch(() => undefined)
     }
   }
 
@@ -99,8 +120,8 @@ export function AdminOrdersPage() {
         <h1 className="text-2xl font-semibold text-ink tracking-tight">Pedidos</h1>
         <button
           type="button"
-          onClick={() => downloadOrdersCsv(filtered, formatPrice)}
-          disabled={filtered.length === 0}
+          onClick={handleExport}
+          disabled={total === 0}
           className="flex items-center gap-2 rounded-md border border-ink/15 bg-surface px-3 py-1.5 text-sm font-medium text-ink/80 shadow-sm transition-colors hover:bg-ink/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent disabled:cursor-not-allowed disabled:opacity-50"
         >
           <Download size={16} className="text-ink/50" /> Exportar CSV

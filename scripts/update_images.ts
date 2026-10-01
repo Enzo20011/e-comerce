@@ -1,4 +1,4 @@
-import { db } from './db.ts';
+import { db } from '../server/db.ts';
 import { products } from '../src/data/products.ts';
 
 const updateStmt = db.prepare('UPDATE products SET image = ?, images = ? WHERE id = ?');

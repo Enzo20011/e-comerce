@@ -12,26 +12,30 @@ import {
   Coins,
   Users,
   X,
-  Store
+  Store,
+  KeyRound,
+  ShieldCheck,
 } from 'lucide-react'
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { useAdminAuth } from '../../hooks/useAdminAuth'
 import { AdminNotifications } from '../../components/admin/AdminNotifications'
 
-const NAV_ITEMS = [
+const NAV_ITEMS: { to: string; label: string; icon: typeof Users; end: boolean; ownerOnly?: boolean }[] = [
   { to: '/admin', label: 'Dashboard', icon: LayoutDashboard, end: true },
   { to: '/admin/products', label: 'Productos', icon: Package, end: false },
   { to: '/admin/orders', label: 'Pedidos', icon: Receipt, end: false },
   { to: '/admin/customers', label: 'Clientes', icon: Users, end: false },
   { to: '/admin/reviews', label: 'Reseñas', icon: MessageSquareText, end: false },
   { to: '/admin/newsletter', label: 'Newsletter', icon: Mail, end: false },
-  { to: '/admin/coupons', label: 'Cupones', icon: Tag, end: false },
-  { to: '/admin/currencies', label: 'Monedas', icon: Coins, end: false },
-  { to: '/admin/activity', label: 'Actividad', icon: History, end: false },
+  { to: '/admin/coupons', label: 'Cupones', icon: Tag, end: false, ownerOnly: true },
+  { to: '/admin/currencies', label: 'Monedas', icon: Coins, end: false, ownerOnly: true },
+  { to: '/admin/activity', label: 'Actividad', icon: History, end: false, ownerOnly: true },
+  { to: '/admin/users', label: 'Usuarios', icon: ShieldCheck, end: false, ownerOnly: true },
+  { to: '/admin/account', label: 'Mi cuenta', icon: KeyRound, end: false },
 ]
 
 export function AdminLayout() {
-  const { logout } = useAdminAuth()
+  const { logout, username, role } = useAdminAuth()
   const navigate = useNavigate()
   const location = useLocation()
   const [sidebarOpen, setSidebarOpen] = useState(false)
@@ -40,8 +44,8 @@ export function AdminLayout() {
     setSidebarOpen(false)
   }, [location.pathname])
 
-  function handleLogout() {
-    logout()
+  async function handleLogout() {
+    await logout()
     navigate('/admin/login')
   }
 
@@ -102,7 +106,7 @@ export function AdminLayout() {
           <div className="mb-2 px-3 text-xs font-semibold uppercase tracking-wider text-ink/40">
             Principal
           </div>
-          {NAV_ITEMS.map(({ to, label, icon: Icon, end }) => (
+          {NAV_ITEMS.filter((item) => !item.ownerOnly || role === 'owner').map(({ to, label, icon: Icon, end }) => (
             <NavLink
               key={to}
               to={to}
@@ -148,9 +152,9 @@ export function AdminLayout() {
               <div className="h-6 w-px bg-ink/10"></div>
               <div className="flex items-center gap-3 rounded-lg p-2 transition-colors hover:bg-ink/5">
                 <div className="flex h-8 w-8 items-center justify-center rounded-full bg-ink/10 text-sm font-medium text-ink/70">
-                  AD
+                  {(username ?? 'AD').slice(0, 2).toUpperCase()}
                 </div>
-                <span className="text-sm font-medium text-ink/80">Admin User</span>
+                <span className="text-sm font-medium text-ink/80">{username ?? 'Admin'}</span>
               </div>
             </div>
           </div>

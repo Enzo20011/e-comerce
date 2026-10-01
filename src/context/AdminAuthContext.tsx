@@ -1,57 +1,69 @@
-import { createContext, useReducer, type ReactNode } from 'react'
-import { apiFetch, getAdminToken, setAdminToken } from '../lib/api'
+import { createContext, useCallback, useEffect, useState, type ReactNode } from 'react'
+import { apiFetch } from '../lib/api'
 
-interface AdminAuthState {
-  isAuthenticated: boolean
-}
+export type AdminRole = 'owner' | 'staff'
 
-type AdminAuthAction = { type: 'LOGIN' } | { type: 'LOGOUT' }
-
-function loadInitialState(): AdminAuthState {
-  return { isAuthenticated: getAdminToken() !== null }
-}
-
-function authReducer(state: AdminAuthState, action: AdminAuthAction): AdminAuthState {
-  switch (action.type) {
-    case 'LOGIN':
-      return { isAuthenticated: true }
-    case 'LOGOUT':
-      return { isAuthenticated: false }
-    default:
-      return state
-  }
+interface AdminSession {
+  username: string
+  role: AdminRole
 }
 
 interface AdminAuthContextValue {
+  /** true mientras se consulta si ya hay una sesión abierta (cookie). */
+  loading: boolean
   isAuthenticated: boolean
+  username: string | null
+  role: AdminRole | null
   login: (username: string, password: string) => Promise<boolean>
-  logout: () => void
+  logout: () => Promise<void>
 }
 
 export const AdminAuthContext = createContext<AdminAuthContextValue | null>(null)
 
 export function AdminAuthProvider({ children }: { children: ReactNode }) {
-  const [state, dispatch] = useReducer(authReducer, undefined, loadInitialState)
+  const [session, setSession] = useState<AdminSession | null>(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    let active = true
+    apiFetch<AdminSession>('/admin/me', { auth: false })
+      .then((data) => active && setSession(data))
+      .catch(() => active && setSession(null))
+      .finally(() => active && setLoading(false))
+    return () => {
+      active = false
+    }
+  }, [])
+
+  const login = useCallback(async (username: string, password: string) => {
+    try {
+      const data = await apiFetch<AdminSession>('/admin/login', {
+        method: 'POST',
+        body: JSON.stringify({ username, password }),
+      })
+      setSession(data)
+      return true
+    } catch {
+      return false
+    }
+  }, [])
+
+  const logout = useCallback(async () => {
+    try {
+      await apiFetch('/admin/logout', { method: 'POST', auth: true })
+    } catch {
+      // la cookie puede haber expirado ya
+    }
+    setSession(null)
+  }, [])
 
   const value: AdminAuthContextValue = {
-    isAuthenticated: state.isAuthenticated,
-    login: async (username, password) => {
-      try {
-        const { token } = await apiFetch<{ token: string }>('/admin/login', {
-          method: 'POST',
-          body: JSON.stringify({ username, password }),
-        })
-        setAdminToken(token)
-        dispatch({ type: 'LOGIN' })
-        return true
-      } catch {
-        return false
-      }
-    },
-    logout: () => {
-      setAdminToken(null)
-      dispatch({ type: 'LOGOUT' })
-    },
+    loading,
+    isAuthenticated: session !== null,
+    username: session?.username ?? null,
+    role: session?.role ?? null,
+    login,
+    logout,
   }
 
   return <AdminAuthContext.Provider value={value}>{children}</AdminAuthContext.Provider>

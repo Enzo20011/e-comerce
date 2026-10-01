@@ -69,9 +69,42 @@ const statusSchema = z.object({
 
 export const ordersRouter = Router()
 
-ordersRouter.get('/orders', requireAdmin, (_req, res) => {
-  const rows = db.prepare('SELECT * FROM orders ORDER BY created_at DESC').all() as unknown as OrderRow[]
-  res.json(rows.map(rowToOrder))
+// Sin parámetros devuelve hasta 5000 pedidos (dashboard/clientes). Con `page` devuelve una página
+// filtrada en el servidor: { items, total, page, pageSize }. Con `export=1`, hasta 10000 filas filtradas.
+ordersRouter.get('/orders', requireAdmin, (req, res) => {
+  const status = String(req.query.status ?? '')
+  const term = String(req.query.q ?? '').trim().toLowerCase()
+  const where: string[] = []
+  const params: (string | number)[] = []
+  if (ORDER_STATUSES.includes(status as OrderStatus)) {
+    where.push('status = ?')
+    params.push(status)
+  }
+  if (term) {
+    const like = `%${term.replace(/[\\%_]/g, '\\$&')}%`
+    where.push("(LOWER(order_number) LIKE ? ESCAPE '\\' OR LOWER(shipping) LIKE ? ESCAPE '\\')")
+    params.push(like, like)
+  }
+  const clause = where.length ? `WHERE ${where.join(' AND ')}` : ''
+
+  if (req.query.page === undefined) {
+    const limit = req.query.export ? 10000 : 5000
+    const rows = db
+      .prepare(`SELECT * FROM orders ${clause} ORDER BY created_at DESC LIMIT ?`)
+      .all(...params, limit) as unknown as OrderRow[]
+    res.json(rows.map(rowToOrder))
+    return
+  }
+
+  const pageSize = Math.min(Math.max(Math.trunc(Number(req.query.pageSize)) || 15, 1), 100)
+  const page = Math.max(Math.trunc(Number(req.query.page)) || 1, 1)
+  const { total } = db.prepare(`SELECT COUNT(*) AS total FROM orders ${clause}`).get(...params) as unknown as {
+    total: number
+  }
+  const rows = db
+    .prepare(`SELECT * FROM orders ${clause} ORDER BY created_at DESC LIMIT ? OFFSET ?`)
+    .all(...params, pageSize, (page - 1) * pageSize) as unknown as OrderRow[]
+  res.json({ items: rows.map(rowToOrder), total, page, pageSize })
 })
 
 ordersRouter.get('/orders/find', orderLookupLimiter, (req, res) => {

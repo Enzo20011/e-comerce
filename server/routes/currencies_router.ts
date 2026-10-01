@@ -1,7 +1,7 @@
 import { Router } from 'express'
 import { db, logActivity } from '../db.ts'
 import { z } from 'zod'
-import { requireAdmin } from '../auth.ts'
+import { requireAdmin, requireOwner } from '../auth.ts'
 
 export const currenciesRouter = Router()
 
@@ -22,7 +22,7 @@ interface Currency {
 // GET /api/currencies — monedas activas (para el frontend público)
 currenciesRouter.get('/', (_req, res) => {
   try {
-    const currencies = db.prepare('SELECT * FROM currencies WHERE active = 1').all() as Currency[]
+    const currencies = db.prepare('SELECT * FROM currencies WHERE active = 1').all() as unknown as Currency[]
     res.json(currencies)
   } catch (error) {
     console.error('Failed to fetch active currencies:', error)
@@ -33,7 +33,7 @@ currenciesRouter.get('/', (_req, res) => {
 // GET /api/currencies/all — todas (para admin)
 currenciesRouter.get('/all', requireAdmin, (_req, res) => {
   try {
-    const currencies = db.prepare('SELECT * FROM currencies ORDER BY is_base DESC, code ASC').all() as Currency[]
+    const currencies = db.prepare('SELECT * FROM currencies ORDER BY is_base DESC, code ASC').all() as unknown as Currency[]
     res.json(currencies)
   } catch (error) {
     console.error('Failed to fetch all currencies:', error)
@@ -42,7 +42,7 @@ currenciesRouter.get('/all', requireAdmin, (_req, res) => {
 })
 
 // PUT /api/currencies/:code — editar tasa / estado
-currenciesRouter.put('/:code', requireAdmin, (req, res) => {
+currenciesRouter.put('/:code', requireAdmin, requireOwner, (req, res) => {
   try {
     const code = String(req.params.code)
     const parsed = currencyUpdateSchema.safeParse(req.body)
@@ -84,7 +84,7 @@ currenciesRouter.put('/:code', requireAdmin, (req, res) => {
  *   rate_eur = (1 / 1540) * 0.92 = 0.000597...
  *   → 1 ARS = 0.000597 EUR  ✓ (1540 ARS ≈ 0.92 EUR si blue=1540)
  */
-currenciesRouter.post('/sync', requireAdmin, async (_req, res) => {
+currenciesRouter.post('/sync', requireAdmin, requireOwner, async (_req, res) => {
   try {
     // 1. Dólar blue (dolarapi.com — solo Argentina, no requiere API key)
     const blueRes = await fetch('https://dolarapi.com/v1/dolares/blue')

@@ -1,7 +1,7 @@
 import { Router } from 'express'
 import { z } from 'zod'
 import { db, logActivity } from '../db.ts'
-import { requireAdmin } from '../auth.ts'
+import { requireAdmin, requireOwner } from '../auth.ts'
 import { validateBody } from '../validation.ts'
 import { productViewLimiter } from '../limiters.ts'
 import type { Product } from '../../src/types/product.ts'
@@ -241,7 +241,7 @@ productsRouter.put('/products/:id', requireAdmin, validateBody(productUpdateSche
   res.json(rowToProduct(row))
 })
 
-productsRouter.delete('/products/:id', requireAdmin, (req, res) => {
+productsRouter.delete('/products/:id', requireAdmin, requireOwner, (req, res) => {
   const id = String(req.params.id)
   const existing = db.prepare('SELECT name FROM products WHERE id = ?').get(id) as
     | { name: string }

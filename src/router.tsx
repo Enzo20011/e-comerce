@@ -23,6 +23,9 @@ import { AdminActivityPage } from './pages/admin/AdminActivityPage'
 import { AdminOrderPrintPage } from './pages/admin/AdminOrderPrintPage'
 import { AdminCurrenciesPage } from './pages/admin/AdminCurrenciesPage'
 
+import { AdminAccountPage } from './pages/admin/AdminAccountPage'
+import { AdminUsersPage } from './pages/admin/AdminUsersPage'
+
 export const router = createBrowserRouter([
   {
     element: <Layout />,
@@ -55,6 +58,8 @@ export const router = createBrowserRouter([
       { path: 'newsletter', element: <AdminNewsletterPage /> },
       { path: 'coupons', element: <AdminCouponsPage /> },
       { path: 'currencies', element: <AdminCurrenciesPage /> },
+      { path: 'account', element: <AdminAccountPage /> },
+      { path: 'users', element: <AdminUsersPage /> },
       { path: 'activity', element: <AdminActivityPage /> },
       { path: 'orders/:id/print', element: <AdminOrderPrintPage /> },
     ],

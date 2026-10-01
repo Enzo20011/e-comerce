@@ -19,6 +19,7 @@ import { Breadcrumbs } from '../components/common/Breadcrumbs'
 import { Skeleton } from '../components/common/Skeleton'
 import { ProductGrid } from '../components/catalog/ProductGrid'
 import { ReviewList } from '../components/product/ReviewList'
+import { ReviewForm } from '../components/product/ReviewForm'
 import type { Product } from '../types/product'
 import type { Review } from '../types/review'
 import { useCurrency } from '../context/CurrencyContext'
@@ -348,6 +349,7 @@ export function ProductDetailPage() {
         <h2 className="font-display text-2xl font-medium text-ink sm:text-3xl">Reseñas de clientes</h2>
         <div className="mt-8 max-w-4xl">
           <ReviewList reviews={reviews} />
+          <ReviewForm productId={product.id} />
         </div>
       </div>
 
