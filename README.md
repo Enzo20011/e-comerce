@@ -2,6 +2,17 @@
 
 Plantilla de e-commerce full-frontend construida con React, TypeScript y Tailwind CSS. Catálogo con búsqueda y filtros en tiempo real, carrito persistente, checkout mock, lista de deseos, modo oscuro y un panel de administración completo con dashboard de ventas — todo con datos mock en `localStorage`, sin backend.
 
+Demo: https://tienda-demo-1f6b.onrender.com. El panel de administración está en `/admin` y en la demo se entra sin contraseña. Es un servidor gratuito: si estaba dormido, la primera carga tarda unos segundos.
+
+La demo le da a cada visitante su propia copia de la base de datos. Esa parte no está en este repositorio.
+
+![Portada de la tienda con el título Diseño que inspira](docs/img/tienda-1.webp)
+![Colecciones de la tienda: electrónica, ropa, hogar y accesorios](docs/img/tienda-2.webp)
+![Panel de administración con ingresos y pedidos](docs/img/tienda-3.webp)
+![Lista de pedidos del panel de administración](docs/img/tienda-4.webp)
+
+Más trabajos en mi portfolio: https://portfolio-fawn-kappa-35.vercel.app
+
 ## Features
 
 **Tienda**
