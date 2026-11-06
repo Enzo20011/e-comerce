@@ -1,57 +1,50 @@
-# Tienda — Plantilla de E-Commerce
+# Tienda
 
-Plantilla de e-commerce full-frontend construida con React, TypeScript y Tailwind CSS. Catálogo con búsqueda y filtros en tiempo real, carrito persistente, checkout mock, lista de deseos, modo oscuro y un panel de administración completo con dashboard de ventas — todo con datos mock en `localStorage`, sin backend.
+Tienda online con catálogo, carrito, checkout simulado y un panel de administración. El frontend es React con TypeScript y Tailwind; el servidor es Express con una base SQLite.
 
 Demo: https://tienda-demo-1f6b.onrender.com. El panel de administración está en `/admin` y en la demo se entra sin contraseña. Es un servidor gratuito: si estaba dormido, la primera carga tarda unos segundos.
 
 La demo le da a cada visitante su propia copia de la base de datos. Esa parte no está en este repositorio.
 
-![Portada de la tienda con el título Diseño que inspira](docs/img/tienda-1.webp)
-![Colecciones de la tienda: electrónica, ropa, hogar y accesorios](docs/img/tienda-2.webp)
+![Portada de la tienda con el título Objetos para el día a día](docs/img/tienda-1.webp)
+![Categorías y catálogo de la tienda: electrónica, ropa, hogar, accesorios y deportes](docs/img/tienda-2.webp)
 ![Panel de administración con ingresos y pedidos](docs/img/tienda-3.webp)
 ![Lista de pedidos del panel de administración](docs/img/tienda-4.webp)
 
 Más trabajos en mi portfolio: https://portfolio-fawn-kappa-35.vercel.app
 
-## Features
+## Qué tiene
 
 **Tienda**
-- Catálogo con búsqueda instantánea, filtro por categoría y orden (precio, nombre, destacados)
-- Grilla bento con producto destacado
-- Página de producto con galería de imágenes, reseñas y productos relacionados
-- Carrito persistente (drawer) con checkout mock de dos pasos y confirmación de pedido
-- Lista de deseos persistente
-- Modo claro/oscuro con toggle
-- Diseño responsive, animaciones con CSS puro
+- Catálogo con búsqueda, filtro por categoría y orden.
+- Página de cada producto, con reseñas.
+- Carrito, lista de deseos, comparador de productos y seguimiento de pedido.
+- Checkout simulado: no se cobra nada.
+- Selector de moneda y modo claro u oscuro.
 
-**Panel admin** (`/admin`)
-- Login mock (protege las rutas de admin)
-- CRUD de productos (alta, edición, borrado) — se refleja al instante en la tienda
-- Listado de pedidos
-- Dashboard de ingresos por día / mes / año con gráficos (`recharts`), sembrado con datos históricos de ejemplo
+**Panel de administración** (`/admin`)
+- Dashboard de ingresos por día, mes y año, con gráficos hechos con `recharts`.
+- Productos (alta, edición y baja), pedidos (con vista para imprimir), clientes, reseñas, newsletter, cupones, monedas y registro de actividad.
+- Usuarios del panel con dos roles, `owner` y `staff`.
 
 ## Stack
 
-- [Vite](https://vite.dev/) + React 19 + TypeScript
-- [Tailwind CSS v4](https://tailwindcss.com/)
-- [react-router-dom](https://reactrouter.com/)
-- [lucide-react](https://lucide.dev/) para íconos
-- [recharts](https://recharts.org/) para los gráficos del dashboard
+- Frontend: Vite, React 19, TypeScript, Tailwind CSS 4, React Router 7, `recharts`, `sonner` y `lucide-react`.
+- Servidor: Express 5, `node:sqlite` (la base es el archivo `server/data.db`), `zod` para validar, `helmet` y `express-rate-limit`.
+- Sesión del panel: JWT en una cookie `HttpOnly`, con contraseñas guardadas con `bcryptjs`.
 
-Todos los datos (productos, pedidos, sesión de admin, carrito, favoritos, tema) se persisten en `localStorage`/`sessionStorage` — no hay backend ni base de datos real, pensado como base reutilizable y adaptable a cualquier rubro.
-
-## Empezar
+## Cómo correrlo
 
 ```bash
 npm install
 npm run dev
 ```
 
-Abrí `http://localhost:5173`.
+`npm run dev` levanta el cliente (Vite) y el servidor a la vez. Otros comandos: `npm run build`, `npm run lint` y `npm run backup`.
 
 ### Panel admin
 
-`http://localhost:5200/admin`. En desarrollo la contraseña inicial se genera al azar y se imprime una vez en la consola del server (o definila con `ADMIN_PASSWORD`).
+En `/admin`. En desarrollo la contraseña inicial se genera al azar y se imprime una vez en la consola del server (o definila con `ADMIN_PASSWORD`).
 
 ### Producción
 
@@ -72,10 +65,14 @@ npm run preview
 
 ```
 src/
-  types/        Tipos (Product, Cart, Order, Review, Wishlist)
-  data/         Datos mock y "servicios" (productService, orderStore, reviewService)
-  context/      Cart, Wishlist, Theme, AdminAuth (React Context + useReducer)
-  hooks/        useCart, useWishlist, useTheme, useProductFilters, etc.
-  components/   Componentes de UI, organizados por área (catalog, cart, checkout, admin, layout)
-  pages/        Páginas de la tienda y del panel admin
+  types/        tipos (producto, carrito, pedido, reseña, lista de deseos)
+  data/         servicios que hablan con la API (productos, pedidos, reseñas)
+  context/      carrito, lista de deseos, tema, moneda y sesión del panel
+  hooks/        useCart, useWishlist, useTheme, useProductFilters, entre otros
+  components/   componentes por área (catalog, cart, checkout, product, compare, admin, layout)
+  pages/        páginas de la tienda y del panel
+server/
+  routes/       productos, pedidos, reseñas, cupones, monedas, newsletter, actividad y admin
+  db.ts         esquema y acceso a SQLite
+  auth.ts       sesión del panel
 ```
