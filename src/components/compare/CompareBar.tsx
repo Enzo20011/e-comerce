@@ -25,7 +25,7 @@ export function CompareBar() {
   if (count === 0) return null
 
   return (
-    <div className="animate-rise-in fixed inset-x-0 bottom-0 z-40 border-t border-ink/10 bg-surface/95 px-4 py-3 backdrop-blur-lg sm:px-6">
+    <div className="animate-rise-in fixed inset-x-0 bottom-0 z-40 border-t border-ink/10 bg-surface/95 px-4 py-3 sm:px-6">
       <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-3">
         <div className="flex items-center gap-2 text-sm font-medium text-ink">
           <Scale size={16} className="text-accent" />

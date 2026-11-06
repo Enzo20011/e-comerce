@@ -75,7 +75,7 @@ export function SmartSearch({ isOpen, onClose }: SmartSearchProps) {
     <div className="fixed inset-0 z-50 flex flex-col items-center pt-24 sm:pt-32" onClick={(e) => {
       if (e.target === e.currentTarget) onClose()
     }}>
-      <div className="absolute inset-0 bg-ink/20 backdrop-blur-sm -z-10" />
+      <div className="absolute inset-0 bg-ink/20 -z-10" />
       
       <div className="w-full max-w-2xl bg-paper sm:rounded-2xl shadow-2xl overflow-hidden border border-ink/10 flex flex-col animate-rise-in" style={{ willChange: 'transform, opacity', transition: 'none' }}>
         <form onSubmit={handleSearchSubmit} className="flex items-center gap-3 border-b border-ink/10 px-4 py-4 sm:px-6 bg-surface">

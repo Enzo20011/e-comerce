@@ -4,7 +4,6 @@ import path from 'node:path'
 import { randomBytes } from 'node:crypto'
 import bcrypt from 'bcryptjs'
 import { products as seedProducts } from '../src/data/products.ts'
-import { AUTHOR_NAMES, REVIEW_BODIES, REVIEW_TITLES } from '../src/data/reviewTemplates.ts'
 import { generateOrderNumber } from '../src/utils/order.ts'
 import type { OrderStatus } from '../src/types/order.ts'
 
@@ -123,27 +122,6 @@ function randomInt(min: number, max: number): number {
   return Math.floor(Math.random() * (max - min + 1)) + min
 }
 
-function hashString(value: string): number {
-  let hash = 0
-  for (let i = 0; i < value.length; i++) {
-    hash = (hash * 31 + value.charCodeAt(i)) >>> 0
-  }
-  return hash
-}
-
-function pick<T>(items: readonly T[], seed: number): T {
-  return items[seed % items.length]
-}
-
-const RELATIVE_DATES = [
-  'hace 2 días',
-  'hace 1 semana',
-  'hace 2 semanas',
-  'hace 1 mes',
-  'hace 2 meses',
-  'hace 3 meses',
-] as const
-
 function seedProductsIfEmpty(): void {
   const { count } = db.prepare('SELECT COUNT(*) as count FROM products').get() as { count: number }
   if (count > 0) return
@@ -165,38 +143,6 @@ function seedProductsIfEmpty(): void {
       product.rating ?? null,
       product.featured ? 1 : 0,
     )
-  }
-}
-
-function seedReviewsIfEmpty(): void {
-  const { count } = db.prepare('SELECT COUNT(*) as count FROM reviews').get() as { count: number }
-  if (count > 0) return
-
-  const insert = db.prepare(`
-    INSERT INTO reviews (id, product_id, author, rating, date, title, body, hidden)
-    VALUES (?, ?, ?, ?, ?, ?, ?, 0)
-  `)
-
-  for (const product of seedProducts) {
-    const baseRating = product.rating ?? 4.5
-    const baseHash = hashString(product.id)
-    const reviewCount = 3 + (baseHash % 4)
-
-    for (let index = 0; index < reviewCount; index++) {
-      const seed = baseHash + index * 97
-      const jitter = ((seed % 5) - 2) * 0.25
-      const rating = Math.min(5, Math.max(1, Math.round((baseRating + jitter) * 2) / 2))
-
-      insert.run(
-        `${product.id}-review-${index}`,
-        product.id,
-        pick(AUTHOR_NAMES, seed),
-        rating,
-        pick(RELATIVE_DATES, seed + 13),
-        pick(REVIEW_TITLES, seed + 29),
-        pick(REVIEW_BODIES, seed + 47),
-      )
-    }
   }
 }
 
@@ -338,7 +284,6 @@ function seedCurrenciesIfEmpty(): void {
 }
 
 seedProductsIfEmpty()
-seedReviewsIfEmpty()
 seedAdminUserIfEmpty()
 seedHistoricalOrdersIfEmpty()
 seedCouponsIfEmpty()

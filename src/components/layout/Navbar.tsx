@@ -12,9 +12,7 @@ import { FREE_SHIPPING_THRESHOLD } from '../../data/orderStore'
 import { useCurrency } from '../../context/CurrencyContext'
 
 const ANNOUNCEMENTS = [
-  '🚚 Envío gratis en compras +{{FREE_SHIPPING_THRESHOLD}}',
-  '💳 3 cuotas sin interés con todas las tarjetas',
-  '🔄 Devoluciones gratis dentro de los 30 días',
+  'Envío gratis en compras desde {{FREE_SHIPPING_THRESHOLD}}',
 ]
 
 export function Navbar() {
@@ -101,7 +99,7 @@ export function Navbar() {
       )}
 
       {/* Main Header */}
-      <header className="sticky top-0 z-30 border-b border-ink/10 bg-paper/95 backdrop-blur-md">
+      <header className="sticky top-0 z-30 border-b border-ink/10 bg-paper/95">
         {/* Top row: Logo + Actions */}
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
           {/* Mobile menu button */}
@@ -116,7 +114,7 @@ export function Navbar() {
 
           {/* Logo */}
           <Link to="/" className="font-display text-xl font-semibold tracking-tight text-ink shrink-0">
-            Tienda<span className="italic text-accent">.</span>
+            Tienda
           </Link>
 
           {/* Desktop category nav */}

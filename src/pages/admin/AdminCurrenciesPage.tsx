@@ -36,7 +36,7 @@ export function AdminCurrenciesPage() {
         { method: 'POST', auth: true },
       )
       const blueInfo = res.blueRate ? ` (Blue: $${res.blueRate.toFixed(0)} ARS/USD)` : ''
-      toast.success(`✅ ${res.updated} monedas actualizadas${blueInfo}`)
+      toast.success(`${res.updated} monedas actualizadas${blueInfo}`)
       await fetchCurrencies()
     } catch (e) {
       toast.error('Error al sincronizar con el mercado')

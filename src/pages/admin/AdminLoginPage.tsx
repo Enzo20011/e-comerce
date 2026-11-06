@@ -33,7 +33,7 @@ export function AdminLoginPage() {
     <div className="flex min-h-screen items-center justify-center bg-paper px-6">
       <div className="w-full max-w-sm rounded-2xl border border-ink/10 bg-surface/50 p-8">
         <p className="font-display text-xl font-semibold text-ink">
-          Tienda<span className="italic text-accent">.</span>
+          Tienda
           <span className="ml-1 text-xs font-normal text-ink/40">admin</span>
         </p>
         <p className="mt-1 text-sm text-ink/50">Ingresá para administrar la tienda.</p>

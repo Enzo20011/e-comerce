@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type MouseEvent } from 'react'
-import { Check, ChevronDown, Eye, Heart, Star, Truck, ShieldCheck, RotateCcw } from 'lucide-react'
+import { Check, ChevronDown, Eye, Heart, Star, Truck } from 'lucide-react'
 import { Navigate, useNavigate, useParams } from 'react-router-dom'
 import {
   getAllProducts,
@@ -23,6 +23,7 @@ import { ReviewForm } from '../components/product/ReviewForm'
 import type { Product } from '../types/product'
 import type { Review } from '../types/review'
 import { useCurrency } from '../context/CurrencyContext'
+import { FLAT_SHIPPING, FREE_SHIPPING_THRESHOLD } from '../data/orderStore'
 
 export function ProductDetailPage() {
   const { id } = useParams<{ id: string }>()
@@ -60,7 +61,7 @@ export function ProductDetailPage() {
     if (!product) return
     addItemSilent(product, quantity)
     toast.custom((t) => (
-      <div className="flex w-full min-w-[320px] max-w-sm items-center gap-4 rounded-2xl border border-ink/10 bg-surface/95 p-3 shadow-2xl shadow-black/10 backdrop-blur-xl animate-in slide-in-from-top-5">
+      <div className="flex w-full min-w-[320px] max-w-sm items-center gap-4 rounded-2xl border border-ink/10 bg-surface/95 p-3 shadow-2xl shadow-black/10 animate-in slide-in-from-top-5">
         <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-xl border border-ink/10 bg-ink/5">
           <img src={product.images[0] ?? product.image} alt="" className="h-full w-full object-cover" />
         </div>
@@ -286,28 +287,11 @@ export function ProductDetailPage() {
             </button>
           </div>
 
-          {/* Trust Badges Minimal */}
-          <div className="mt-8 flex flex-col gap-4 rounded-2xl bg-ink/5 p-6">
-            <div className="flex items-start gap-4">
-              <Truck className="mt-0.5 text-ink/70" size={20} />
-              <div>
-                <p className="font-medium text-ink">Envío gratis a todo el país</p>
-                <p className="text-sm text-ink/60">Llega entre 2 y 5 días hábiles.</p>
-              </div>
-            </div>
-            <div className="flex items-start gap-4">
-              <ShieldCheck className="mt-0.5 text-ink/70" size={20} />
-              <div>
-                <p className="font-medium text-ink">Pago seguro garantizado</p>
-                <p className="text-sm text-ink/60">Tus datos están protegidos por SSL.</p>
-              </div>
-            </div>
-            <div className="flex items-start gap-4">
-              <RotateCcw className="mt-0.5 text-ink/70" size={20} />
-              <div>
-                <p className="font-medium text-ink">Devoluciones sin costo</p>
-                <p className="text-sm text-ink/60">Tenés 30 días para cambiarlo.</p>
-              </div>
+          <div className="mt-8 flex items-start gap-4 rounded-2xl bg-ink/5 p-6">
+            <Truck className="mt-0.5 text-ink/70" size={20} />
+            <div>
+              <p className="font-medium text-ink">Envío gratis desde {formatPrice(FREE_SHIPPING_THRESHOLD)}</p>
+              <p className="text-sm text-ink/60">En compras menores el envío cuesta {formatPrice(FLAT_SHIPPING)}.</p>
             </div>
           </div>
 
@@ -324,12 +308,11 @@ export function ProductDetailPage() {
             </details>
             <details className="group">
               <summary className="flex cursor-pointer items-center justify-between py-5 text-base font-medium text-ink transition-colors hover:text-accent focus-visible:outline-none">
-                Envíos y devoluciones
+                Envíos
                 <ChevronDown size={20} className="transition-transform duration-300 group-open:rotate-180 text-ink/50" />
               </summary>
               <div className="pb-5 text-ink/70 leading-relaxed text-sm">
-                <p>Todos nuestros envíos se realizan de forma segura y cuentan con código de seguimiento. El tiempo estimado de entrega es de 2 a 5 días hábiles.</p>
-                <p className="mt-2">Si no estás conforme con tu compra, podés devolverla gratis dentro de los primeros 30 días. El producto debe estar en sus condiciones originales.</p>
+                <p>El envío es gratis en compras desde {formatPrice(FREE_SHIPPING_THRESHOLD)}. En compras menores se cobra {formatPrice(FLAT_SHIPPING)}.</p>
               </div>
             </details>
           </div>

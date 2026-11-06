@@ -35,7 +35,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
     setJustAdded(true)
     
     toast.custom((t) => (
-      <div className="flex w-full min-w-[320px] max-w-sm items-center gap-4 rounded-2xl border border-ink/10 bg-surface/95 p-3 shadow-2xl shadow-black/10 backdrop-blur-xl animate-in slide-in-from-top-5">
+      <div className="flex w-full min-w-[320px] max-w-sm items-center gap-4 rounded-2xl border border-ink/10 bg-surface/95 p-3 shadow-2xl shadow-black/10 animate-in slide-in-from-top-5">
         <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-xl border border-ink/10 bg-ink/5">
           <img src={product.image} alt="" className="h-full w-full object-cover" />
         </div>
@@ -96,7 +96,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
             type="button"
             onClick={() => toggleItem(product.id)}
             aria-label={wishlisted ? `Quitar ${product.name} de favoritos` : `Agregar ${product.name} a favoritos`}
-            className="flex h-8 w-8 items-center justify-center rounded-full bg-paper/90 text-ink/70 backdrop-blur transition-all duration-150 hover:text-accent active:scale-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 shadow-sm"
+            className="flex h-8 w-8 items-center justify-center rounded-full bg-paper/90 text-ink/70 transition-all duration-150 hover:text-accent active:scale-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 shadow-sm"
           >
             <Heart size={15} className={wishlisted ? 'fill-accent text-accent' : ''} />
           </button>
@@ -104,7 +104,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
             type="button"
             onClick={() => toggleCompare(product.id)}
             aria-label={comparing ? `Quitar ${product.name} de la comparación` : `Agregar ${product.name} a comparar`}
-            className={`flex h-8 w-8 items-center justify-center rounded-full bg-paper/90 backdrop-blur transition-all duration-150 active:scale-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 shadow-sm ${
+            className={`flex h-8 w-8 items-center justify-center rounded-full bg-paper/90 transition-all duration-150 active:scale-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 shadow-sm ${
               comparing ? 'text-accent' : 'text-ink/70 hover:text-accent'
             }`}
           >
@@ -120,7 +120,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
             </span>
           )}
           {product.stock === 0 && (
-            <span className="rounded-full bg-ink/75 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-paper backdrop-blur shadow-sm">
+            <span className="rounded-full bg-ink/75 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-paper shadow-sm">
               Sin stock
             </span>
           )}
@@ -134,7 +134,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
               handleAdd()
             }}
             disabled={product.stock === 0}
-            className="relative w-full overflow-hidden rounded-2xl bg-paper/90 px-4 py-3.5 text-sm font-semibold text-ink shadow-lg backdrop-blur-xl transition-all hover:bg-paper hover:shadow-xl active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 flex items-center justify-center gap-2 border border-ink/10"
+            className="relative w-full overflow-hidden rounded-2xl bg-paper/90 px-4 py-3.5 text-sm font-semibold text-ink shadow-lg transition-all hover:bg-paper hover:shadow-xl active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 flex items-center justify-center gap-2 border border-ink/10"
           >
             {justAdded ? (
               <span className="flex items-center gap-2 text-accent-vivid animate-in fade-in zoom-in duration-300">

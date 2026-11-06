@@ -41,7 +41,6 @@ export const products: Product[] = [
     price: 138585,
     category: 'Electrónica',
     stock: 24,
-    rating: 4.6,
     featured: true,
   }),
   product({
@@ -51,7 +50,6 @@ export const products: Product[] = [
     price: 92385,
     category: 'Electrónica',
     stock: 40,
-    rating: 4.3,
   }),
   product({
     id: 'reloj-pulse',
@@ -60,7 +58,6 @@ export const products: Product[] = [
     price: 200185,
     category: 'Electrónica',
     stock: 15,
-    rating: 4.5,
   }),
   product({
     id: 'camara-lume',
@@ -69,7 +66,6 @@ export const products: Product[] = [
     price: 115485,
     category: 'Electrónica',
     stock: 18,
-    rating: 4.2,
   }),
 
   // Ropa
@@ -80,7 +76,6 @@ export const products: Product[] = [
     price: 100085,
     category: 'Ropa',
     stock: 30,
-    rating: 4.4,
   }),
   product({
     id: 'buzo-cronos',
@@ -89,7 +84,6 @@ export const products: Product[] = [
     price: 70825,
     category: 'Ropa',
     stock: 50,
-    rating: 4.7,
     featured: true,
   }),
   product({
@@ -99,7 +93,6 @@ export const products: Product[] = [
     price: 30785,
     category: 'Ropa',
     stock: 100,
-    rating: 4.1,
   }),
   product({
     id: 'pantalon-atlas',
@@ -108,7 +101,6 @@ export const products: Product[] = [
     price: 84685,
     category: 'Ropa',
     stock: 35,
-    rating: 4.3,
   }),
 
   // Hogar
@@ -119,7 +111,6 @@ export const products: Product[] = [
     price: 44645,
     category: 'Hogar',
     stock: 45,
-    rating: 4.5,
   }),
   product({
     id: 'lampara-faro',
@@ -128,7 +119,6 @@ export const products: Product[] = [
     price: 61585,
     category: 'Hogar',
     stock: 20,
-    rating: 4.4,
   }),
   product({
     id: 'manta-abrigo',
@@ -137,7 +127,6 @@ export const products: Product[] = [
     price: 76985,
     category: 'Hogar',
     stock: 25,
-    rating: 4.8,
     featured: true,
   }),
   product({
@@ -147,7 +136,6 @@ export const products: Product[] = [
     price: 53885,
     category: 'Hogar',
     stock: 30,
-    rating: 4.2,
   }),
 
   // Accesorios
@@ -158,7 +146,6 @@ export const products: Product[] = [
     price: 123185,
     category: 'Accesorios',
     stock: 22,
-    rating: 4.6,
   }),
   product({
     id: 'billetera-nordic',
@@ -167,7 +154,6 @@ export const products: Product[] = [
     price: 50805,
     category: 'Accesorios',
     stock: 60,
-    rating: 4.3,
   }),
   product({
     id: 'gorra-horizon',
@@ -176,7 +162,6 @@ export const products: Product[] = [
     price: 38485,
     category: 'Accesorios',
     stock: 70,
-    rating: 4.0,
   }),
 
   // Deportes
@@ -187,7 +172,6 @@ export const products: Product[] = [
     price: 35405,
     category: 'Deportes',
     stock: 80,
-    rating: 4.7,
     featured: true,
   }),
   product({
@@ -197,7 +181,6 @@ export const products: Product[] = [
     price: 56965,
     category: 'Deportes',
     stock: 40,
-    rating: 4.5,
   }),
   product({
     id: 'mancuernas-core',
@@ -206,6 +189,5 @@ export const products: Product[] = [
     price: 153985,
     category: 'Deportes',
     stock: 12,
-    rating: 4.6,
   }),
 ]

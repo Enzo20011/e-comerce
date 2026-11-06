@@ -76,7 +76,7 @@ export function AdminLayout() {
       {sidebarOpen && (
         <div
           onClick={() => setSidebarOpen(false)}
-          className="fixed inset-0 z-30 bg-gray-900/40 backdrop-blur-sm lg:hidden transition-opacity"
+          className="fixed inset-0 z-30 bg-gray-900/40 lg:hidden transition-opacity"
         />
       )}
 

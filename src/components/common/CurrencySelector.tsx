@@ -2,18 +2,6 @@ import { useEffect, useRef, useState } from 'react'
 import { ChevronDown } from 'lucide-react'
 import { useCurrency } from '../../context/CurrencyContext'
 
-const CURRENCY_FLAGS: Record<string, string> = {
-  ARS: '🇦🇷',
-  USD: '🇺🇸',
-  EUR: '🇪🇺',
-  BRL: '🇧🇷',
-  CLP: '🇨🇱',
-  MXN: '🇲🇽',
-  GBP: '🇬🇧',
-  JPY: '🇯🇵',
-  CAD: '🇨🇦',
-}
-
 export function CurrencySelector() {
   const { currencies, activeCurrency, setCurrency, isLoading } = useCurrency()
   const [open, setOpen] = useState(false)
@@ -48,8 +36,7 @@ export function CurrencySelector() {
         aria-label={`Moneda actual: ${activeCurrency.code}`}
         aria-expanded={open}
       >
-        <span>{CURRENCY_FLAGS[activeCurrency.code] ?? '💱'}</span>
-        <span className="hidden sm:inline">{activeCurrency.code}</span>
+        <span>{activeCurrency.code}</span>
         <ChevronDown
           size={14}
           className={`text-ink/40 transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
@@ -73,7 +60,6 @@ export function CurrencySelector() {
                     : 'text-ink/70 hover:bg-ink/5 hover:text-ink'
                 }`}
               >
-                <span className="text-base leading-none">{CURRENCY_FLAGS[c.code] ?? '💱'}</span>
                 <span className="font-medium">{c.code}</span>
                 <span className="ml-auto text-xs text-ink/40">{c.symbol}</span>
               </button>

@@ -17,7 +17,7 @@ export function ConfirmDialog({
 }: ConfirmDialogProps) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-6">
-      <div onClick={onCancel} className="absolute inset-0 bg-ink/40 backdrop-blur-sm" />
+      <div onClick={onCancel} className="absolute inset-0 bg-ink/40" />
 
       <div className="animate-rise-in relative w-full max-w-sm rounded-2xl border border-ink/10 bg-surface p-6 shadow-xl">
         <div className="flex h-10 w-10 items-center justify-center rounded-full bg-accent/10 text-accent">

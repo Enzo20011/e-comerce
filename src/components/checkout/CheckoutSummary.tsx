@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useCurrency } from '../../context/CurrencyContext'
-import { Check, Lock, RotateCcw, ShieldCheck, Tag, X } from 'lucide-react'
+import { Check, Tag, X } from 'lucide-react'
 import type { CartItem } from '../../types/cart'
 import type { CouponValidationResult } from '../../types/order'
 import { getOrderTotal, getShippingCost, validateCoupon } from '../../data/orderStore'
@@ -149,20 +149,6 @@ export function CheckoutSummary({
         </div>
       </div>
 
-      <div className="mt-5 flex flex-col gap-2 border-t border-ink/10 pt-4 text-xs text-ink/50">
-        <div className="flex items-center gap-2">
-          <Lock size={13} className="text-accent" />
-          Pago 100% seguro con cifrado SSL
-        </div>
-        <div className="flex items-center gap-2">
-          <ShieldCheck size={13} className="text-accent" />
-          Tus datos nunca se comparten con terceros
-        </div>
-        <div className="flex items-center gap-2">
-          <RotateCcw size={13} className="text-accent" />
-          30 días para cambios y devoluciones
-        </div>
-      </div>
     </div>
   )
 }

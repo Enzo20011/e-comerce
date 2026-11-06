@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState, useRef } from 'react'
-import { ArrowRight, X, ShieldCheck, RefreshCw, Truck, Headphones, Star, ChevronRight, ChevronLeft } from 'lucide-react'
+import { ArrowRight, X, Truck, ChevronRight, ChevronLeft } from 'lucide-react'
 import { deriveCategories, getAllProducts } from '../data/productService'
 import { getRecentlyViewedIds } from '../data/recentlyViewed'
 import { useDocumentTitle } from '../hooks/useDocumentTitle'
@@ -16,44 +16,7 @@ import type { Product } from '../types/product'
 
 
 
-const TRUST_BADGES = [
-  { icon: Truck, title: 'Envío gratis', subtitle: 'En compras +{{FREE_SHIPPING_THRESHOLD}}' },
-  { icon: ShieldCheck, title: 'Pago seguro', subtitle: '100% protegido' },
-  { icon: RefreshCw, title: 'Devoluciones', subtitle: '30 días sin costo' },
-  { icon: Headphones, title: 'Soporte 24/7', subtitle: 'Siempre disponible' },
-]
-
-const CATEGORY_COVERS: Record<string, string> = {
-  'Electrónica': '/images/cat-electronica.jpg',
-  'Ropa':         '/images/cat-ropa.jpg',
-  'Hogar':        '/images/cat-hogar.jpg',
-  'Accesorios':   '/images/cat-accesorios.jpg',
-  'Deportes':     '/images/cat-deportes.jpg',
-}
-
-const TESTIMONIALS = [
-  {
-    name: 'Valentina R.',
-    avatar: 'VR',
-    rating: 5,
-    text: 'Increíble calidad en los productos y el envío fue rapidísimo. ¡Definitivamente vuelvo a comprar!',
-    product: 'Auriculares Inalámbricos Aura',
-  },
-  {
-    name: 'Martín G.',
-    avatar: 'MG',
-    rating: 5,
-    text: 'La atención al cliente es excelente. Me ayudaron con mi consulta en minutos y el producto llegó perfecto.',
-    product: 'Mochila Urbana Voyager',
-  },
-  {
-    name: 'Lucía P.',
-    avatar: 'LP',
-    rating: 5,
-    text: 'Compré el set de tazas y son hermosas. La presentación del packaging fue un detalle muy lindo.',
-    product: 'Set de Tazas Cerámica Nube',
-  },
-]
+const COLLECTIONS = ['Electrónica', 'Ropa', 'Hogar', 'Accesorios', 'Deportes']
 
 export function HomePage() {
   useDocumentTitle()
@@ -61,7 +24,6 @@ export function HomePage() {
 
   const [allProducts, setAllProducts] = useState<Product[] | null>(null)
 
-  const videoRef = useRef<HTMLVideoElement>(null)
   const recentlyViewedRef = useRef<HTMLDivElement>(null)
 
   function scrollRecentlyViewed(direction: 'left' | 'right') {
@@ -116,120 +78,46 @@ export function HomePage() {
 
   return (
     <div>
-      {/* ─── HERO IMMERSIVE ─────────────────────────────────────────────────────── */}
-      <section className="relative h-[95vh] min-h-[600px] w-full overflow-hidden flex items-center justify-center">
-        {/* Cinematic Video background */}
-        <div className="absolute inset-0 bg-black">
-          <video
-            ref={videoRef}
-            className="h-full w-full object-cover opacity-60 scale-105 animate-[slow-zoom_20s_ease-out_infinite_alternate]"
-            autoPlay
-            muted
-            loop
-            playsInline
-            poster="https://images.unsplash.com/photo-1616423641405-b461825b16c5?w=2000&q=80"
-          >
-            <source
-              src="https://videos.pexels.com/video-files/3252018/3252018-uhd_2560_1440_25fps.mp4"
-              type="video/mp4"
-            />
-          </video>
-        </div>
-
-        {/* Dramatic Vignette and Glow */}
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,rgba(0,0,0,0.8)_100%)] mix-blend-multiply" />
-        <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-80" />
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 h-32 bg-accent/20 blur-[100px] rounded-full pointer-events-none mix-blend-screen" />
-
-        {/* Content */}
-        <div className="relative z-10 flex flex-col items-center text-center px-6 max-w-5xl mx-auto mt-10">
-          <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-[11px] font-bold uppercase tracking-[0.2em] text-white/80 backdrop-blur-md mb-8">
-            <span className="h-1.5 w-1.5 rounded-full bg-accent animate-pulse" />
-            Colección 2026
-          </span>
-
-          <h1 className="font-display text-[clamp(3.5rem,10vw,8rem)] font-semibold leading-[0.9] tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-white via-white to-white/60 drop-shadow-sm">
-            Diseño que <br className="hidden md:block" />
-            <span className="text-white italic pr-4">inspir<span className="text-accent/90">a</span>.</span>
+      {/* Portada */}
+      <section className="border-b border-ink/10">
+        <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-24">
+          <h1 className="font-display max-w-3xl text-4xl font-semibold leading-tight tracking-tight text-ink sm:text-6xl">
+            Objetos para el día a día
           </h1>
-
-          <p className="mt-8 max-w-xl text-lg md:text-xl font-light leading-relaxed text-white/70">
-            Una selección curada de objetos cotidianos elevados a su máxima expresión. Materiales premium, estética impecable.
+          <p className="mt-5 max-w-xl text-base leading-relaxed text-ink/70 sm:text-lg">
+            Electrónica, ropa, hogar, accesorios y deportes. Buscá, comparalos y armá tu pedido.
           </p>
-
-          <div className="mt-12 flex items-center justify-center">
-            <a
-              href="#catalogo"
-              className="group relative inline-flex items-center justify-center overflow-hidden rounded-full bg-white px-8 py-4 font-semibold text-black transition-all hover:scale-105 active:scale-95 shadow-[0_0_40px_rgba(255,255,255,0.3)]"
-            >
-              <span className="relative z-10 flex items-center gap-2">
-                Explorar Colección
-                <ArrowRight size={18} className="transition-transform group-hover:translate-x-1" />
-              </span>
-            </a>
-          </div>
-        </div>
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-white/60">
-          <span className="text-[10px] uppercase tracking-widest">Explorar</span>
-          <div className="h-8 w-px rounded-full bg-gradient-to-b from-white/60 to-transparent animate-pulse" />
-        </div>
-      </section>
-
-      {/* ─── TRUST MARQUEE ──────────────────────────────────────────────── */}
-      <section className="border-b border-ink/8 bg-surface/60 overflow-hidden py-4">
-        <div className="flex w-max animate-marquee items-center gap-12 px-6 sm:gap-24">
-          {[...TRUST_BADGES, ...TRUST_BADGES, ...TRUST_BADGES].map(({ icon: Icon, title, subtitle }, i) => (
-            <div key={i} className="flex items-center gap-3">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-accent/10">
-                <Icon size={20} className="text-accent" />
-              </div>
-              <div className="whitespace-nowrap">
-                <p className="text-sm font-semibold text-ink">{title}</p>
-                <p className="text-xs text-ink/50">{subtitle.replace('{{FREE_SHIPPING_THRESHOLD}}', formatPrice(FREE_SHIPPING_THRESHOLD))}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* ─── COLECCIONES DESTACADAS ────────────────────────────────────── */}
-      <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6">
-        <div className="mb-8 flex items-end justify-between">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-widest text-accent">Explorar</p>
-            <h2 className="mt-1 font-display text-2xl font-semibold text-ink sm:text-3xl">
-              Colecciones
-            </h2>
-          </div>
-          <a href="#catalogo" className="hidden items-center gap-1 text-sm font-medium text-ink/50 hover:text-accent transition-colors sm:flex">
-            Ver todo <ChevronRight size={15} />
+          <a
+            href="#catalogo"
+            className="mt-8 inline-flex items-center gap-2 rounded-full bg-ink px-7 py-3.5 text-sm font-semibold text-paper transition-colors hover:bg-accent"
+          >
+            Ver el catálogo
+            <ArrowRight size={16} />
           </a>
         </div>
+      </section>
 
-        <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-5">
-          {Object.entries(CATEGORY_COVERS).map(([cat, img], i) => (
+      {/* Envío */}
+      <section className="border-b border-ink/10 bg-surface/60">
+        <div className="mx-auto flex max-w-7xl items-center gap-3 px-4 py-4 text-sm text-ink/70 sm:px-6">
+          <Truck size={18} className="text-accent" />
+          Envío gratis en compras desde {formatPrice(FREE_SHIPPING_THRESHOLD)}
+        </div>
+      </section>
+
+      {/* Categorías */}
+      <section className="mx-auto max-w-7xl px-4 py-14 sm:px-6">
+        <h2 className="font-display text-2xl font-semibold text-ink sm:text-3xl">Categorías</h2>
+        <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+          {COLLECTIONS.map((cat) => (
             <a
               key={cat}
-              href={`#catalogo`}
+              href="#catalogo"
               onClick={() => setSelectedCategory(cat)}
-              className={`group relative overflow-hidden rounded-2xl bg-ink/10 ${
-                i === 0 ? 'col-span-2 row-span-2 lg:col-span-2 lg:row-span-2' : ''
-              }`}
-              style={{ aspectRatio: i === 0 ? '1' : '3/4' }}
+              className="group flex items-center justify-between rounded-xl border border-ink/10 px-4 py-5 text-ink transition-colors hover:border-accent hover:text-accent"
             >
-              <img
-                src={img}
-                alt={cat}
-                className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
-                loading="lazy"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-ink/70 via-ink/20 to-transparent" />
-              <div className="absolute bottom-0 left-0 p-4">
-                <p className="font-display text-sm font-semibold text-paper sm:text-base">{cat}</p>
-                <span className="inline-flex items-center gap-1 text-xs text-paper/70 group-hover:text-paper/90 transition-colors">
-                  Ver más <ArrowRight size={11} />
-                </span>
-              </div>
+              <span className="font-display text-base font-semibold">{cat}</span>
+              <ArrowRight size={16} className="text-ink/40 transition-transform group-hover:translate-x-1 group-hover:text-accent" />
             </a>
           ))}
         </div>
@@ -368,48 +256,6 @@ export function HomePage() {
         )}
       </section>
 
-      {/* ─── TESTIMONIOS ───────────────────────────────────────────────── */}
-      <section className="border-t border-ink/8 bg-surface/60 py-20">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6">
-          <div className="text-center">
-            <p className="text-xs font-semibold uppercase tracking-widest text-accent">Reviews</p>
-            <h2 className="mt-2 font-display text-2xl font-semibold text-ink sm:text-3xl">
-              Lo que dicen nuestros clientes
-            </h2>
-            <div className="mt-2 flex items-center justify-center gap-1">
-              {[...Array(5)].map((_, i) => (
-                <Star key={i} size={16} className="fill-accent-2 text-accent-2" />
-              ))}
-              <span className="ml-2 text-sm text-ink/50">4.7 / 5 · +2,400 reseñas</span>
-            </div>
-          </div>
-
-          <div className="mt-12 grid gap-6 sm:grid-cols-3">
-            {TESTIMONIALS.map((t) => (
-              <div
-                key={t.name}
-                className="group rounded-2xl border border-ink/10 bg-paper p-6 transition-all duration-200 hover:-translate-y-1 hover:border-ink/20 hover:shadow-lg hover:shadow-ink/5"
-              >
-                <div className="flex items-center gap-1 mb-4">
-                  {[...Array(t.rating)].map((_, i) => (
-                    <Star key={i} size={14} className="fill-accent-2 text-accent-2" />
-                  ))}
-                </div>
-                <p className="text-sm leading-relaxed text-ink/70">"{t.text}"</p>
-                <div className="mt-5 flex items-center gap-3">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-full bg-accent/15 text-xs font-bold text-accent">
-                    {t.avatar}
-                  </div>
-                  <div>
-                    <p className="text-sm font-semibold text-ink">{t.name}</p>
-                    <p className="text-xs text-ink/40">{t.product}</p>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
     </div>
   )
 }
